@@ -47,6 +47,7 @@ jobs:
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
+            --configuration=release_arm64 \
             --disableProvisioningProfiles \
             --disableCodesign
             
@@ -89,3 +90,4 @@ jobs:
           echo "- Edit History (view message versions)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Download the unsigned IPA from Artifacts and sign with ESign on iPhone." >> $GITHUB_STEP_SUMMARY
+
