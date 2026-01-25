@@ -1,3 +1,4 @@
+import MPAK
 import SGStrings
 import SGSimpleSettings
 import TranslateUI
@@ -742,6 +743,7 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
     private var currentSwipeToReplyTranslation: CGFloat = 0.0
     
     private var appliedItem: ChatMessageItem?
+    private var mpakDeletedIndicatorNode: ASImageNode?  // MPAK: Trash icon for deleted messages
     private var appliedForwardInfo: (Peer?, String?)?
     private var disablesComments = true
     
@@ -3708,6 +3710,33 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
         strongSelf.contentContainersWrapperNode.frame = CGRect(origin: CGPoint(), size: layout.contentSize)
         
         strongSelf.appliedItem = item
+
+        // MPAK: Apply deleted message styling
+        if let message = item.message as? Message {
+            let isDeleted = MPAKDeletedMessages.isMessageDeleted(message)
+            if isDeleted {
+                // Apply reduced opacity to main content
+                strongSelf.mainContainerNode.alpha = 0.6
+                
+                // Show trash indicator
+                if strongSelf.mpakDeletedIndicatorNode == nil {
+                    let indicatorNode = ASImageNode()
+                    indicatorNode.displaysAsynchronously = false
+                    indicatorNode.displayWithoutProcessing = true
+                    if #available(iOS 13.0, *) {
+                        let config = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+                        indicatorNode.image = UIImage(systemName: "trash.fill", withConfiguration: config)?.withTintColor(.systemRed, renderingMode: .alwaysOriginal)
+                    }
+                    strongSelf.addSubnode(indicatorNode)
+                    strongSelf.mpakDeletedIndicatorNode = indicatorNode
+                }
+                strongSelf.mpakDeletedIndicatorNode?.isHidden = false
+                strongSelf.mpakDeletedIndicatorNode?.frame = CGRect(x: 8, y: 8, width: 16, height: 16)
+            } else {
+                strongSelf.mainContainerNode.alpha = 1.0
+                strongSelf.mpakDeletedIndicatorNode?.isHidden = true
+            }
+        }
         strongSelf.appliedForwardInfo = (forwardSource, forwardAuthorSignature)
         strongSelf.updateAccessibilityData(accessibilityData)
         strongSelf.disablesComments = disablesComments
