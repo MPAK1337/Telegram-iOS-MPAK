@@ -272,3 +272,31 @@
 "Settings.NY.Style.snow" = "Снег";
 "Settings.NY.Style.lightning" = "Молнии";
 "Settings.NY.Notice" = "Доступны только на ограниченное время!";
+
+/* MPAK Mod */
+"MPAK.Header" = "MPAK МОД";
+"MPAK.AntiDelete" = "Анти-Удаление";
+"MPAK.AntiDelete.Notice" = "Сохранять удалённые сообщения с пониженной прозрачностью и иконкой корзины.";
+"MPAK.EditHistory" = "История Редактирования";
+"MPAK.EditHistory.Notice" = "Сохранять все версии отредактированных сообщений. Просмотр через меню долгого нажатия.";
+
+"MPAK.ChatFilters.Header" = "СОХРАНЯТЬ ИЗ ЧАТОВ";
+"MPAK.ChatFilters.PrivateChats" = "Личные чаты";
+"MPAK.ChatFilters.Groups" = "Группы";
+"MPAK.ChatFilters.Channels" = "Каналы";
+"MPAK.ChatFilters.Bots" = "Боты";
+
+"MPAK.DeleteAll" = "Удалить все сохранённые";
+"MPAK.DeleteAll.Confirm.Title" = "Удалить все сохранённые сообщения?";
+"MPAK.DeleteAll.Confirm.Text" = "Это уберёт флаг 'удалено' со всех сохранённых сообщений. Они больше не будут помечены как удалённые.";
+"MPAK.DeleteAll.Confirm.Delete" = "Удалить всё";
+
+"MPAK.History.Title" = "История редактирования";
+"MPAK.History.Empty" = "История редактирования недоступна";
+"MPAK.History.ContextMenu" = "История";
+
+"MPAK.Message.Deleted" = "Удалено";
+"MPAK.Message.DeletedAt" = "Удалено в %@";
+
+"MPAK.Developer" = "Разработчик";
+"MPAK.Version" = "Версия MPAK";
