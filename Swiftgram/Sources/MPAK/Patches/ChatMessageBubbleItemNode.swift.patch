@@ -1,0 +1,82 @@
+# MPAK Mod Patch for ChatMessageBubbleItemNode.swift
+# Location: submodules/TelegramUI/Sources/Chat/ChatMessageBubbleItemNode.swift
+# 
+# This patch adds visual display for deleted messages:
+# - Reduced opacity (0.6)
+# - Trash icon in top-right corner
+
+# Step 1: Add import for MPAK at the top
++ import MPAK
+
+# Step 2: Find the updateLayout or didLoad method where message content is rendered
+# Add check for deleted message status and apply styling:
+
+# In the method where message bubble is laid out, add:
++ // MPAK: Check if message is marked as deleted
++ let isMPAKDeleted = MPAKDeletedMessages.isMessageDeleted(item.message)
++ 
++ if isMPAKDeleted {
++     // Apply reduced opacity
++     self.alpha = MPAKSettings.DeletedMessageUI.opacity
++     
++     // Add trash icon overlay if not already added
++     if self.mpakTrashIconView == nil {
++         let trashIcon = UIImageView()
++         if #available(iOS 13.0, *) {
++             let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
++             trashIcon.image = UIImage(systemName: MPAKSettings.DeletedMessageUI.trashIconName, withConfiguration: config)
++             trashIcon.tintColor = .systemRed
++         }
++         trashIcon.frame = CGRect(x: 4, y: 4, width: 18, height: 18)
++         self.addSubview(trashIcon)
++         self.mpakTrashIconView = trashIcon
++     }
++     self.mpakTrashIconView?.isHidden = false
++ } else {
++     self.alpha = 1.0
++     self.mpakTrashIconView?.isHidden = true
++ }
+
+# Step 3: Add property for trash icon view
+# Near other view properties, add:
++ private var mpakTrashIconView: UIImageView?
+
+# Alternative approach using existing Telegram patterns:
+# If the above doesn't integrate well, use the message overlay system:
+
+# In ChatMessageBubbleContentNode or similar, add:
++ // MPAK Deleted Message Indicator
++ private func updateMPAKDeletedIndicator(message: Message, theme: PresentationTheme) {
++     let isDeleted = MPAKDeletedMessages.isMessageDeleted(message)
++     
++     if isDeleted {
++         // Use theme-appropriate opacity
++         self.contentContainerNode.alpha = 0.6
++         
++         // Show trash badge
++         if self.mpakDeletedBadge == nil {
++             let badge = ASImageNode()
++             badge.displaysAsynchronously = false
++             badge.displayWithoutProcessing = true
++             self.addSubnode(badge)
++             self.mpakDeletedBadge = badge
++         }
++         
++         // Configure badge with trash icon
++         let badgeSize = CGSize(width: 20, height: 20)
++         self.mpakDeletedBadge?.image = generateTintedImage(
++             image: UIImage(bundleImageName: "Chat/Message/Trash"),
++             color: theme.chat.message.mediaOverlayControlColors.foregroundColor
++         )
++         self.mpakDeletedBadge?.frame = CGRect(
++             origin: CGPoint(x: 4, y: 4),
++             size: badgeSize
++         )
++         self.mpakDeletedBadge?.isHidden = false
++     } else {
++         self.contentContainerNode.alpha = 1.0
++         self.mpakDeletedBadge?.isHidden = true
++     }
++ }
++
++ private var mpakDeletedBadge: ASImageNode?
