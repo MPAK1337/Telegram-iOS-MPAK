@@ -45,12 +45,17 @@ private enum SGControllerSection: Int32, SGItemListSection {
     case accountColors
     case other
     case mpak
+    case mpakFilters
 }
 
 private enum SGBoolSetting: String {
     // MPAK Mod settings
     case mpakAntiDelete
     case mpakAntiEdit
+    case mpakSavePrivateChats
+    case mpakSaveGroupChats
+    case mpakSaveChannels
+    case mpakSaveBots
     case hidePhoneInSettings
     case showTabNames
     case showContactsTab
@@ -332,13 +337,25 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.toggle(id: id.count, section: .other, settingName: .hidePhoneInSettings, value: SGSimpleSettings.shared.hidePhoneInSettings, text: i18n("Settings.HidePhoneInSettingsUI", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .other, text: i18n("Settings.HidePhoneInSettingsUI.Notice", lang)))
     
+
     // MPAK Mod: Settings Section
-    entries.append(.header(id: id.count, section: .mpak, text: MPAKSettings.Strings.sectionTitle, badge: nil))
-    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiDelete, value: MPAKSettings.antiDeleteEnabled, text: MPAKSettings.Strings.antiDeleteTitle, enabled: true))
-    entries.append(.notice(id: id.count, section: .mpak, text: MPAKSettings.Strings.antiDeleteDescription))
-    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiEdit, value: MPAKSettings.antiEditEnabled, text: MPAKSettings.Strings.antiEditTitle, enabled: true))
-    entries.append(.notice(id: id.count, section: .mpak, text: MPAKSettings.Strings.antiEditDescription))
-    entries.append(.notice(id: id.count, section: .mpak, text: "\(MPAKSettings.Strings.aboutDeveloper)\n\(MPAKSettings.developerTelegram)"))
+    entries.append(.header(id: id.count, section: .mpak, text: i18n("MPAK.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiDelete, value: MPAKSettings.antiDeleteEnabled, text: i18n("MPAK.AntiDelete", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.AntiDelete.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiEdit, value: MPAKSettings.antiEditEnabled, text: i18n("MPAK.EditHistory", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.EditHistory.Notice", lang)))
+    
+    // MPAK Chat Filters (show if any MPAK feature enabled)
+    if MPAKSettings.antiDeleteEnabled || MPAKSettings.antiEditEnabled {
+        entries.append(.header(id: id.count, section: .mpakFilters, text: i18n("MPAK.ChatFilters.Header", lang), badge: nil))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSavePrivateChats, value: MPAKSettings.savePrivateChats, text: i18n("MPAK.ChatFilters.PrivateChats", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveGroupChats, value: MPAKSettings.saveGroupChats, text: i18n("MPAK.ChatFilters.Groups", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveChannels, value: MPAKSettings.saveChannels, text: i18n("MPAK.ChatFilters.Channels", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveBots, value: MPAKSettings.saveBots, text: i18n("MPAK.ChatFilters.Bots", lang), enabled: true))
+    }
+    
+    // MPAK Developer info
+    entries.append(.notice(id: id.count, section: .mpak, text: "\(i18n("MPAK.Developer", lang)): @naebx | \(i18n("MPAK.Version", lang)): \(MPAKSettings.modVersion)"))
     
     return filterSGItemListUIEntrires(entries: entries, by: state.searchQuery)
 }
@@ -380,6 +397,14 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             MPAKSettings.antiDeleteEnabled = value
         case .mpakAntiEdit:
             MPAKSettings.antiEditEnabled = value
+        case .mpakSavePrivateChats:
+            MPAKSettings.savePrivateChats = value
+        case .mpakSaveGroupChats:
+            MPAKSettings.saveGroupChats = value
+        case .mpakSaveChannels:
+            MPAKSettings.saveChannels = value
+        case .mpakSaveBots:
+            MPAKSettings.saveBots = value
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
