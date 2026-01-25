@@ -106,6 +106,7 @@ public extension Transaction {
             
             return .update(StoreMessage(
                 id: message.id,
+                customStableId: message.stableId,
                 globallyUniqueId: message.globallyUniqueId,
                 groupingKey: message.groupingKey,
                 threadId: message.threadId,
