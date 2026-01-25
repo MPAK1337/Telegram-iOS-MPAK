@@ -49,23 +49,19 @@ jobs:
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
             --configuration=release_arm64 \
-            --codesigningInformationPath=build-system/fake-codesigning
+            --codesigningInformationPath=build-system/fake-codesigning \
+            --disableExtensions
             
       - name: Find Built IPA
         id: find_ipa
         run: |
           echo "Searching for IPA files..."
           find . -name "*.ipa" 2>/dev/null | head -10 || true
-          find build-output -name "*.ipa" 2>/dev/null | head -5 || true
           
           IPA_PATH=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
           if [ -n "$IPA_PATH" ]; then
             echo "Found IPA: $IPA_PATH"
             echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
-          else
-            echo "No IPA found yet, checking build directories..."
-            ls -la build-output/ 2>/dev/null || true
-            ls -la build/ 2>/dev/null || true
           fi
           
       - name: Upload MPAK Mod IPA
