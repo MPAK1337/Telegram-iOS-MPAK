@@ -272,3 +272,31 @@
 "Settings.NY.Style.snow" = "Snow";
 "Settings.NY.Style.lightning" = "Lightning";
 "Settings.NY.Notice" = "Available for a limited time only!";
+
+/* MPAK Mod */
+"MPAK.Header" = "MPAK MOD";
+"MPAK.AntiDelete" = "Anti-Delete";
+"MPAK.AntiDelete.Notice" = "Keep deleted messages visible with reduced opacity and trash icon.";
+"MPAK.EditHistory" = "Edit History";
+"MPAK.EditHistory.Notice" = "Save all versions of edited messages. View with long-press menu.";
+
+"MPAK.ChatFilters.Header" = "SAVE FROM CHATS";
+"MPAK.ChatFilters.PrivateChats" = "Private Chats";
+"MPAK.ChatFilters.Groups" = "Groups";
+"MPAK.ChatFilters.Channels" = "Channels";
+"MPAK.ChatFilters.Bots" = "Bots";
+
+"MPAK.DeleteAll" = "Delete All Saved";
+"MPAK.DeleteAll.Confirm.Title" = "Delete All Saved Messages?";
+"MPAK.DeleteAll.Confirm.Text" = "This will remove the 'deleted' flag from all saved messages. They will no longer be marked as deleted.";
+"MPAK.DeleteAll.Confirm.Delete" = "Delete All";
+
+"MPAK.History.Title" = "Edit History";
+"MPAK.History.Empty" = "No edit history available";
+"MPAK.History.ContextMenu" = "History";
+
+"MPAK.Message.Deleted" = "Deleted";
+"MPAK.Message.DeletedAt" = "Deleted at %@";
+
+"MPAK.Developer" = "Developer";
+"MPAK.Version" = "MPAK Version";
