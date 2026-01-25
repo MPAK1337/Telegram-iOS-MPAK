@@ -1,4 +1,5 @@
 import SGStrings
+import MPAK
 import SGSimpleSettings
 import PeerInfoUI
 import Foundation
@@ -1188,6 +1189,40 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                 })
             })))
             if !SGSimpleSettings.shared.contextShowReply { sgActions.append(actions.removeLast()) }
+        }
+        
+        // MPAK Mod: History button for edited messages
+        if MPAKSettings.antiEditEnabled {
+            let editHistory = MPAKDeletedMessages.getEditHistory(message: messages[0])
+            if !editHistory.isEmpty {
+                actions.append(.action(ContextMenuActionItem(text: MPAKSettings.Strings.historyButtonTitle, icon: { theme in
+                    return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.actionSheet.primaryTextColor)
+                }, action: { c, _ in
+                    c?.dismiss(result: .dismissWithoutContent, completion: {
+                        // Show edit history
+                        var historyText = ""
+                        for (index, entry) in editHistory.enumerated() {
+                            let date = Date(timeIntervalSince1970: Double(entry.date))
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .short
+                            formatter.timeStyle = .short
+                            historyText += "\(index + 1). [\(formatter.string(from: date))]\n\(entry.text)\n"
+                            if let media = entry.mediaDescription {
+                                historyText += "\(media)\n"
+                            }
+                            historyText += "\n"
+                        }
+                        
+                        let alertController = textAlertController(
+                            context: context,
+                            title: MPAKSettings.Strings.historyButtonTitle,
+                            text: historyText.isEmpty ? "No history" : historyText,
+                            actions: [TextAlertAction(type: .defaultAction, title: "OK", action: {})]
+                        )
+                        controllerInteraction.presentController(alertController, nil)
+                    })
+                })))
+            }
         }
         
         if data.messageActions.options.contains(.sendScheduledNow) {
