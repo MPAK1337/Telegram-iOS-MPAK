@@ -1,0 +1,88 @@
+# MPAK Mod Patch for SGSettingsController.swift
+# Location: Swiftgram/SGSettingsUI/Sources/SGSettingsController.swift
+
+# Step 1: Add import for MPAK at the top (after other imports)
+# Add after: import SGStrings
++ import MPAK
+
+# Step 2: Add MPAK section to SGControllerSection enum
+# Find: case other
+# Add BEFORE:
++     case mpak
++     case mpakFilters
+
+# Step 3: Add MPAK boolean settings to SGBoolSetting enum  
+# Find: case nyStyleLightning
+# Add AFTER:
++     // MPAK Mod
++     case mpakAntiDelete
++     case mpakEditHistory
++     case mpakSavePrivateChats
++     case mpakSaveGroupChats
++     case mpakSaveChannels
++     case mpakSaveBots
+
+# Step 4: Add MPAK entries in SGControllerEntries function
+# Find the end of "other" section entries (before "return entries")
+# Add this block:
+
+    // MARK: - MPAK Mod Section
+    entries.append(.header(id: id.count, section: .mpak, text: i18n("MPAK.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiDelete, value: MPAKSettings.antiDeleteEnabled, text: i18n("MPAK.AntiDelete", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.AntiDelete.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakEditHistory, value: MPAKSettings.antiEditEnabled, text: i18n("MPAK.EditHistory", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.EditHistory.Notice", lang)))
+    
+    // MPAK Chat Filters (only show if anti-delete or edit history enabled)
+    if MPAKSettings.antiDeleteEnabled || MPAKSettings.antiEditEnabled {
+        entries.append(.header(id: id.count, section: .mpakFilters, text: i18n("MPAK.ChatFilters.Header", lang), badge: nil))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSavePrivateChats, value: MPAKSettings.savePrivateChats, text: i18n("MPAK.ChatFilters.PrivateChats", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveGroupChats, value: MPAKSettings.saveGroupChats, text: i18n("MPAK.ChatFilters.Groups", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveChannels, value: MPAKSettings.saveChannels, text: i18n("MPAK.ChatFilters.Channels", lang), enabled: true))
+        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveBots, value: MPAKSettings.saveBots, text: i18n("MPAK.ChatFilters.Bots", lang), enabled: true))
+        
+        // Delete All button
+        entries.append(.action(id: id.count, section: .mpakFilters, text: i18n("MPAK.DeleteAll", lang), kind: .destructive))
+    }
+    
+    // Developer info
+    entries.append(.notice(id: id.count, section: .mpak, text: "\(i18n("MPAK.Developer", lang)): @naebx | \(i18n("MPAK.Version", lang)): \(MPAKSettings.modVersion)"))
+
+# Step 5: Add toggle handlers in the toggle action handler
+# Find the switch statement for SGBoolSetting toggles
+# Add these cases:
+
+            case .mpakAntiDelete:
+                MPAKSettings.antiDeleteEnabled = value
+            case .mpakEditHistory:
+                MPAKSettings.antiEditEnabled = value
+            case .mpakSavePrivateChats:
+                MPAKSettings.savePrivateChats = value
+            case .mpakSaveGroupChats:
+                MPAKSettings.saveGroupChats = value
+            case .mpakSaveChannels:
+                MPAKSettings.saveChannels = value
+            case .mpakSaveBots:
+                MPAKSettings.saveBots = value
+
+# Step 6: Add action handler for "Delete All" button
+# Find where other actions are handled and add:
+
+            // Handle MPAK Delete All action
+            if entry.section == .mpakFilters && entry.kind == .destructive {
+                let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+                let lang = presentationData.strings.baseLanguageCode
+                
+                let alertController = textAlertController(
+                    context: context,
+                    title: i18n("MPAK.DeleteAll.Confirm.Title", lang),
+                    text: i18n("MPAK.DeleteAll.Confirm.Text", lang),
+                    actions: [
+                        TextAlertAction(type: .destructiveAction, title: i18n("MPAK.DeleteAll.Confirm.Delete", lang), action: {
+                            MPAKDeletedMessages.clearAllMPAKData()
+                        }),
+                        TextAlertAction(type: .defaultAction, title: presentationData.strings.Common_Cancel, action: {})
+                    ]
+                )
+                presentControllerImpl?(alertController, nil)
+            }
