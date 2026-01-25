@@ -4227,19 +4227,31 @@ func replayFinalState(
                     }
                 }
             case let .DeleteMessagesWithGlobalIds(ids):
+                // MPAK Mod: Anti-delete hook
+                let remainingGlobalIds = MPAKDeletedMessages.markMessagesAsDeleted(globalIds: ids, transaction: transaction)
+                guard !remainingGlobalIds.isEmpty else {
+                    // All messages were marked as deleted by MPAK, skip actual deletion
+                    break
+                }
                 var resourceIds: [MediaResourceId] = []
-                transaction.deleteMessagesWithGlobalIds(ids, forEachMedia: { media in
+                transaction.deleteMessagesWithGlobalIds(remainingGlobalIds, forEachMedia: { media in
                     addMessageMediaResourceIdsToRemove(media: media, resourceIds: &resourceIds)
                 })
                 if !resourceIds.isEmpty {
                     let _ = mediaBox.removeCachedResources(Array(Set(resourceIds)), force: true).start()
                 }
-                deletedMessageIds.append(contentsOf: ids.map { .global($0) })
+                deletedMessageIds.append(contentsOf: remainingGlobalIds.map { .global($0) })
             case let .DeleteMessages(ids):
-                _internal_deleteMessages(transaction: transaction, mediaBox: mediaBox, ids: ids, manualAddMessageThreadStatsDifference: { id, add, remove in
+                // MPAK Mod: Anti-delete hook
+                let remainingIds = MPAKDeletedMessages.markMessagesAsDeleted(ids: ids, transaction: transaction)
+                guard !remainingIds.isEmpty else {
+                    // All messages were marked as deleted by MPAK, skip actual deletion
+                    break
+                }
+                _internal_deleteMessages(transaction: transaction, mediaBox: mediaBox, ids: remainingIds, manualAddMessageThreadStatsDifference: { id, add, remove in
                     addMessageThreadStatsDifference(threadKey: id, remove: remove, addedMessagePeer: nil, addedMessageId: nil, isOutgoing: false)
                 })
-                deletedMessageIds.append(contentsOf: ids.map { .messageId($0) })
+                deletedMessageIds.append(contentsOf: remainingIds.map { .messageId($0) })
             case let .UpdateMinAvailableMessage(id):
                 if let message = transaction.getMessage(id) {
                     updatePeerChatInclusionWithMinTimestamp(transaction: transaction, id: id.peerId, minTimestamp: message.timestamp, forceRootGroupIfNotExists: false)
