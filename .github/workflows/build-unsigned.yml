@@ -45,7 +45,7 @@ jobs:
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
-            --bazelArguments="--//Telegram:disableProvisioningProfiles=True" \
+            --bazelArguments="--//Telegram:disableProvisioningProfiles=True --//Telegram:disableExtensions=True" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
