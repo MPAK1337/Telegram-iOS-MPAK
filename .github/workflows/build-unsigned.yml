@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 240
     
     steps:
@@ -19,10 +19,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           
-      - name: Setup Xcode 15.2
+      - name: Setup Xcode 26
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '15.2'
+          xcode-version: '26.0'
           
       - name: Install Dependencies
         run: |
@@ -35,17 +35,16 @@ jobs:
           path: |
             ~/bazel-disk-cache
             ~/.cache/bazel
-          key: bazel-macos14-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
+          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
           restore-keys: |
-            bazel-macos14-${{ hashFiles('WORKSPACE', 'BUILD') }}-
-            bazel-macos14-
+            bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-
+            bazel-macos26-
             
       - name: Build Swiftgram IPA (Unsigned)
         run: |
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
-            --overrideXcodeVersion \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
@@ -91,8 +90,3 @@ jobs:
           echo "- Edit History (view message versions)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Download the unsigned IPA from Artifacts and sign with ESign on iPhone." >> $GITHUB_STEP_SUMMARY
-
-
-
-
-
