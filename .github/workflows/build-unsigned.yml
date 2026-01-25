@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew install bazelisk
-          pip3 install -U pip
+          pip3 install -U pip --break-system-packages || true
           
       - name: Cache Bazel
         uses: actions/cache@v4
