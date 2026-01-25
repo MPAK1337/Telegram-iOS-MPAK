@@ -4288,7 +4288,7 @@ func replayFinalState(
                     var updatedAttributes = message.attributes
                     
                     // MPAK Mod: Save edit history
-                    MPAKDeletedMessages.saveEditHistory(message: previousMessage, updatedAttributes: &updatedAttributes)
+                    MPAKDeletedMessages.saveEditHistory(previousMessage: previousMessage, updatedAttributes: &updatedAttributes)
                     
                     if previousMessage.localTags.contains(.OutgoingLiveLocation) {
                         updatedLocalTags.insert(.OutgoingLiveLocation)
