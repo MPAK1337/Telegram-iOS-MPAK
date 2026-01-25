@@ -50,7 +50,8 @@ jobs:
             --buildNumber=${{ github.run_number }} \
             --configuration=release_arm64 \
             --codesigningInformationPath=build-system/fake-codesigning \
-            --disableExtensions
+            --disableExtensions \
+            --disableProvisioningProfiles
             
       - name: Find Built IPA
         id: find_ipa
