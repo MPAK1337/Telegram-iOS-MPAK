@@ -2,6 +2,7 @@
 // File: Swiftgram/Sources/MPAK/MPAKSettings.swift
 
 import Foundation
+import UIKit
 
 public struct MPAKSettings {
     
@@ -26,6 +27,28 @@ public struct MPAKSettings {
     public static let developerTelegram = "https://t.me/naebx"
     public static let modVersion = "1.0.0"
     
+    // MARK: - Deleted Message Gradient Colors
+    public struct DeletedMessageGradient {
+        // Pink-Purple gradient for deleted messages
+        public static let startColor = UIColor(red: 1.0, green: 0.42, blue: 0.62, alpha: 0.3) // #FF6B9D with 30% opacity
+        public static let endColor = UIColor(red: 0.77, green: 0.29, blue: 1.0, alpha: 0.3)   // #C44AFF with 30% opacity
+        
+        // Gradient colors as hex for reference
+        public static let startColorHex: UInt32 = 0xFF6B9D
+        public static let endColorHex: UInt32 = 0xC44AFF
+        
+        /// Returns a CAGradientLayer configured for deleted message highlight
+        public static func makeGradientLayer(frame: CGRect) -> CAGradientLayer {
+            let gradient = CAGradientLayer()
+            gradient.frame = frame
+            gradient.colors = [startColor.cgColor, endColor.cgColor]
+            gradient.startPoint = CGPoint(x: 0, y: 0)
+            gradient.endPoint = CGPoint(x: 1, y: 1)
+            gradient.cornerRadius = 8
+            return gradient
+        }
+    }
+    
     // MARK: - Localization
     public struct Strings {
         public static let sectionTitle = "MPAK"
@@ -37,6 +60,7 @@ public struct MPAKSettings {
         public static let antiEditDescription = "Save message versions before edits"
         
         public static let historyButtonTitle = "History"
+        public static let deletedIndicator = "[deleted]"
         
         public static let aboutTitle = "About Developer"
         public static let aboutDeveloper = "Developed by MPAK"
@@ -52,6 +76,7 @@ public struct MPAKSettings {
         public static let antiEditDescriptionRu = "Сохранять версии сообщений до редактирования"
         
         public static let historyButtonTitleRu = "История"
+        public static let deletedIndicatorRu = "[удалено]"
         
         public static let aboutTitleRu = "О разработчике"
         public static let aboutDeveloperRu = "Разработано MPAK"
