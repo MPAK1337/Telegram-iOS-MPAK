@@ -1,0 +1,91 @@
+name: Build MPAK Mod Unsigned IPA
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 240
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          
+      - name: Setup Xcode 15.2
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.2'
+          
+      - name: Install Dependencies
+        run: |
+          brew install bazelisk
+          pip3 install -U pip
+          
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/bazel-disk-cache
+            ~/.cache/bazel
+          key: bazel-macos14-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
+          restore-keys: |
+            bazel-macos14-${{ hashFiles('WORKSPACE', 'BUILD') }}-
+            bazel-macos14-
+            
+      - name: Build Swiftgram IPA (Unsigned)
+        run: |
+          python3 build-system/Make/Make.py \
+            --cacheDir="$HOME/bazel-disk-cache" \
+            build \
+            --configurationPath="build-system/appstore-configuration.json" \
+            --buildNumber=${{ github.run_number }} \
+            --disableProvisioningProfiles \
+            --disableCodesign
+            
+      - name: Find Built IPA
+        id: find_ipa
+        run: |
+          echo "Searching for IPA files..."
+          find . -name "*.ipa" 2>/dev/null | head -10 || true
+          find build-output -name "*.ipa" 2>/dev/null | head -5 || true
+          
+          IPA_PATH=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
+          if [ -n "$IPA_PATH" ]; then
+            echo "Found IPA: $IPA_PATH"
+            echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+          else
+            echo "No IPA found yet, checking build directories..."
+            ls -la build-output/ 2>/dev/null || true
+            ls -la build/ 2>/dev/null || true
+          fi
+          
+      - name: Upload MPAK Mod IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Swiftgram-MPAK-Mod-unsigned-${{ github.run_number }}
+          path: |
+            build-output/**/*.ipa
+            build/**/*.ipa
+            bazel-out/**/*.ipa
+            **/*.ipa
+          retention-days: 30
+          if-no-files-found: warn
+          
+      - name: Build Summary
+        run: |
+          echo "## MPAK Mod Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Features:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Anti-Delete (keep deleted messages)" >> $GITHUB_STEP_SUMMARY
+          echo "- Edit History (view message versions)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the unsigned IPA from Artifacts and sign with ESign on iPhone." >> $GITHUB_STEP_SUMMARY
