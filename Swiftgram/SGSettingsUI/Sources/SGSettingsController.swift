@@ -1,5 +1,6 @@
 // MARK: Swiftgram
 import SGLogging
+import MPAK
 import SGSimpleSettings
 import SGStrings
 import SGAPIToken
@@ -43,9 +44,13 @@ private enum SGControllerSection: Int32, SGItemListSection {
     case contextMenu
     case accountColors
     case other
+    case mpak
 }
 
 private enum SGBoolSetting: String {
+    // MPAK Mod settings
+    case mpakAntiDelete
+    case mpakAntiEdit
     case hidePhoneInSettings
     case showTabNames
     case showContactsTab
@@ -327,6 +332,14 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.toggle(id: id.count, section: .other, settingName: .hidePhoneInSettings, value: SGSimpleSettings.shared.hidePhoneInSettings, text: i18n("Settings.HidePhoneInSettingsUI", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .other, text: i18n("Settings.HidePhoneInSettingsUI.Notice", lang)))
     
+    // MPAK Mod: Settings Section
+    entries.append(.header(id: id.count, section: .mpak, text: MPAKSettings.Strings.sectionTitle, badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiDelete, value: MPAKSettings.antiDeleteEnabled, text: MPAKSettings.Strings.antiDeleteTitle, enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: MPAKSettings.Strings.antiDeleteDescription))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiEdit, value: MPAKSettings.antiEditEnabled, text: MPAKSettings.Strings.antiEditTitle, enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: MPAKSettings.Strings.antiEditDescription))
+    entries.append(.notice(id: id.count, section: .mpak, text: "\(MPAKSettings.Strings.aboutDeveloper)\n\(MPAKSettings.developerTelegram)"))
+    
     return filterSGItemListUIEntrires(entries: entries, by: state.searchQuery)
 }
 
@@ -362,6 +375,11 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
           }
         },*/ setBoolValue: { setting, value in
         switch setting {
+        // MPAK Mod: Handle MPAK settings
+        case .mpakAntiDelete:
+            MPAKSettings.antiDeleteEnabled = value
+        case .mpakAntiEdit:
+            MPAKSettings.antiEditEnabled = value
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
