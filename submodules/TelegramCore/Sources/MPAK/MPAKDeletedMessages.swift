@@ -83,14 +83,44 @@ public extension MPAKDeletedMessages {
 
 // MARK: - Save Edit History
 public extension MPAKDeletedMessages {
-    /// Saves original message text before edit
+    /// Saves original message text before edit - works inside updateMessage closure
     static func saveEditHistory(
-        messageId: MessageId,
-        originalText: String,
-        transaction: Transaction
+        previousMessage: Message,
+        updatedAttributes: inout [MessageAttribute]
     ) {
-        guard antiEditEnabled, !originalText.isEmpty else { return }
-        transaction.addEditHistoryRecord(messageId: messageId, originalText: originalText)
+        guard antiEditEnabled else { return }
+        
+        let originalText = previousMessage.text
+        guard !originalText.isEmpty else { return }
+        
+        // Get or create MPAK attribute from existing updated attributes
+        var mpakAttr: MPAKMessageAttribute
+        if let existing = updatedAttributes.first(where: { $0 is MPAKMessageAttribute }) as? MPAKMessageAttribute {
+            mpakAttr = MPAKMessageAttribute(
+                isDeleted: existing.isDeleted,
+                deletedTimestamp: existing.deletedTimestamp,
+                editHistory: existing.editHistory
+            )
+        } else if let existing = previousMessage.mpakAttribute {
+            mpakAttr = MPAKMessageAttribute(
+                isDeleted: existing.isDeleted,
+                deletedTimestamp: existing.deletedTimestamp,
+                editHistory: existing.editHistory
+            )
+        } else {
+            mpakAttr = MPAKMessageAttribute()
+        }
+        
+        // Add edit record with original text
+        let record = MPAKEditRecord(
+            text: originalText,
+            timestamp: previousMessage.timestamp
+        )
+        mpakAttr.editHistory.append(record)
+        
+        // Update attributes array
+        updatedAttributes.removeAll { $0 is MPAKMessageAttribute }
+        updatedAttributes.append(mpakAttr)
     }
 }
 
