@@ -45,13 +45,12 @@ jobs:
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
+            --bazelArguments="--//Telegram:disableProvisioningProfiles=True" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
             --configuration=release_arm64 \
-            --codesigningInformationPath=build-system/fake-codesigning \
-            --disableExtensions \
-            --disableProvisioningProfiles
+            --codesigningInformationPath=build-system/fake-codesigning
             
       - name: Find Built IPA
         id: find_ipa
