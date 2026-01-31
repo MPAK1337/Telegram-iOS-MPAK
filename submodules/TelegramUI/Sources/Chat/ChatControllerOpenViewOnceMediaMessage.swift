@@ -125,7 +125,7 @@ import AdsInfoScreen
 
 extension ChatControllerImpl {
     func openViewOnceMediaMessage(_ message: Message) {
-        if self.screenCaptureManager?.isRecordingActive == true {
+        if self.screenCaptureManager?.isRecordingActive == true, !MPAKProtection.disableScreenCaptureAlerts {
             let controller = textAlertController(context: self.context, updatedPresentationData: self.updatedPresentationData, title: nil, text: self.presentationData.strings.Chat_PlayOnceMesasge_DisableScreenCapture, actions: [TextAlertAction(type: .defaultAction, title: self.presentationData.strings.Common_OK, action: {
             })])
             self.present(controller, in: .window(.root))

@@ -157,8 +157,37 @@ private func requestActivity(postbox: Postbox, network: Network, accountPeerId: 
                     }
                 }
             }
-            if MPAKGhostMode.hideTyping {
-                return .complete()
+            if let activity = activity {
+                switch activity {
+                case .typingText:
+                    if MPAKGhostMode.hideTyping {
+                        return .complete()
+                    }
+                case .recordingVoice:
+                    if MPAKGhostMode.hideAudioRecording {
+                        return .complete()
+                    }
+                case .recordingInstantVideo, .uploadingInstantVideo:
+                    if MPAKGhostMode.hideVideoMessages {
+                        return .complete()
+                    }
+                case .uploadingFile, .uploadingPhoto, .uploadingVideo:
+                    if MPAKGhostMode.hideUploads {
+                        return .complete()
+                    }
+                case .choosingSticker, .interactingWithEmoji, .seeingEmojiInteraction:
+                    if MPAKGhostMode.hideStickerInteractions {
+                        return .complete()
+                    }
+                case .speakingInGroupCall:
+                    if MPAKGhostMode.hideGroupCallVoice {
+                        return .complete()
+                    }
+                case .playingGame:
+                    if MPAKGhostMode.hideGameActivity {
+                        return .complete()
+                    }
+                }
             }
             if let _ = peer as? TelegramUser {
                 if let presence = transaction.getPeerPresence(peerId: peerId) as? TelegramUserPresence {
