@@ -522,6 +522,7 @@ private enum PeerInfoContextSubject {
 private enum PeerInfoSettingsSection {
     case swiftgram
     case swiftgramPro
+    case mpakMod
     case avatar
     case edit
     case proxy
@@ -1020,6 +1021,10 @@ private func settingsItems(showProfileId: Bool, data: PeerInfoScreenData?, conte
     }
     items[.swiftgram]!.append(PeerInfoScreenDisclosureItem(id: 1, label: swiftgramLabel, text: "Swiftgram", icon: PresentationResourcesSettings.swiftgram, action: {
         interaction.openSettings(.swiftgram)
+    }))
+    let mpakLabel = i18n("MPAK.MenuTitle", presentationData.strings.baseLanguageCode)
+    items[.swiftgram]!.append(PeerInfoScreenDisclosureItem(id: 2, text: mpakLabel, icon: PresentationResourcesSettings.swiftgram, action: {
+        interaction.openSettings(.mpakMod)
     }))
 
     var appIndex = 1000
@@ -11100,6 +11105,8 @@ final class PeerInfoScreenNode: ViewControllerTracingNode, PeerInfoScreenNodePro
                     self.controller?.present(self.context.sharedContext.makeSGUpdateIOSController(), animated: true)
                 }
             }
+        case .mpakMod:
+            self.controller?.push(sgSettingsController(context: self.context))
         case .avatar:
             self.controller?.openAvatarForEditing()
         case .edit:

@@ -283,6 +283,7 @@
 "MPAK.Ghost.HideContact" = "Hide Contact Activity";
 "MPAK.LocalPremium" = "Local Premium";
 "MPAK.LocalPremium.Notice" = "Unlock premium limits locally (folders, pins, chats in folders).";
+"MPAK.MenuTitle" = "MPAK Mod";
 
 "MPAK.ChatFilters.Header" = "SAVE FROM CHATS";
 "MPAK.ChatFilters.PrivateChats" = "Private Chats";

@@ -283,6 +283,7 @@
 "MPAK.Ghost.HideContact" = "Скрывать активность контакта";
 "MPAK.LocalPremium" = "Локальный Premium";
 "MPAK.LocalPremium.Notice" = "Снять лимиты локально (папки, закрепы, чаты в папках).";
+"MPAK.MenuTitle" = "MPAK Мод";
 
 "MPAK.ChatFilters.Header" = "СОХРАНЯТЬ ИЗ ЧАТОВ";
 "MPAK.ChatFilters.PrivateChats" = "Личные чаты";
