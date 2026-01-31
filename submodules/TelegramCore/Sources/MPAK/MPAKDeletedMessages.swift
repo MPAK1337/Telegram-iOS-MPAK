@@ -12,6 +12,10 @@ public struct MPAKDeletedMessages {}
 public extension MPAKDeletedMessages {
     private static let antiDeleteKey = "mpak_antiDelete"
     private static let antiEditKey = "mpak_antiEdit"
+    private static let savePrivateChatsKey = "mpak_savePrivateChats"
+    private static let saveGroupChatsKey = "mpak_saveGroupChats"
+    private static let saveChannelsKey = "mpak_saveChannels"
+    private static let saveBotsKey = "mpak_saveBots"
     
     static var antiDeleteEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: antiDeleteKey) }
@@ -22,10 +26,72 @@ public extension MPAKDeletedMessages {
         get { UserDefaults.standard.bool(forKey: antiEditKey) }
         set { UserDefaults.standard.setValue(newValue, forKey: antiEditKey) }
     }
+
+    static var savePrivateChats: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: savePrivateChatsKey) == nil {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: savePrivateChatsKey)
+        }
+        set { UserDefaults.standard.setValue(newValue, forKey: savePrivateChatsKey) }
+    }
+
+    static var saveGroupChats: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: saveGroupChatsKey) == nil {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: saveGroupChatsKey)
+        }
+        set { UserDefaults.standard.setValue(newValue, forKey: saveGroupChatsKey) }
+    }
+
+    static var saveChannels: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: saveChannelsKey) == nil {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: saveChannelsKey)
+        }
+        set { UserDefaults.standard.setValue(newValue, forKey: saveChannelsKey) }
+    }
+
+    static var saveBots: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: saveBotsKey) == nil {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: saveBotsKey)
+        }
+        set { UserDefaults.standard.setValue(newValue, forKey: saveBotsKey) }
+    }
 }
 
 // MARK: - Mark Messages as Deleted
 public extension MPAKDeletedMessages {
+    private static func shouldSaveForPeer(_ peerId: PeerId) -> Bool {
+        switch peerId.namespace {
+        case Namespaces.Peer.CloudUser:
+            return savePrivateChats
+        case Namespaces.Peer.CloudGroup:
+            return saveGroupChats
+        case Namespaces.Peer.CloudChannel:
+            return saveChannels
+        case Namespaces.Peer.SecretChat:
+            return savePrivateChats
+        default:
+            return true
+        }
+    }
+
+    private static func isPeerBot(_ peer: Peer?) -> Bool {
+        if let user = peer as? TelegramUser {
+            return user.botInfo != nil
+        }
+        return false
+    }
+
     /// Marks messages as deleted by global IDs (server-side deletion events)
     /// Returns IDs that were NOT marked (should still be deleted)
     static func markMessagesAsDeleted(
@@ -40,13 +106,25 @@ public extension MPAKDeletedMessages {
         let currentTimestamp = Int32(Date().timeIntervalSince1970)
         
         for globalId in globalIds {
-            if let id = transaction.messageIdsForGlobalIds([globalId]).first {
-                transaction.updateMPAKAttribute(messageId: id) { attr in
-                    if !attr.isDeleted {
-                        attr.isDeleted = true
-                        attr.deletedTimestamp = currentTimestamp
-                        markedIds.append(globalId)
-                    }
+            guard let id = transaction.messageIdsForGlobalIds([globalId]).first else {
+                continue
+            }
+
+            guard shouldSaveForPeer(id.peerId) else {
+                continue
+            }
+
+            if let message = transaction.getMessage(id),
+               isPeerBot(message.author),
+               !saveBots {
+                continue
+            }
+
+            transaction.updateMPAKAttribute(messageId: id) { attr in
+                if !attr.isDeleted {
+                    attr.isDeleted = true
+                    attr.deletedTimestamp = currentTimestamp
+                    markedIds.append(globalId)
                 }
             }
         }
@@ -68,6 +146,16 @@ public extension MPAKDeletedMessages {
         let currentTimestamp = Int32(Date().timeIntervalSince1970)
         
         for id in ids {
+            guard shouldSaveForPeer(id.peerId) else {
+                continue
+            }
+
+            if let message = transaction.getMessage(id),
+               isPeerBot(message.author),
+               !saveBots {
+                continue
+            }
+
             transaction.updateMPAKAttribute(messageId: id) { attr in
                 if !attr.isDeleted {
                     attr.isDeleted = true
@@ -89,6 +177,12 @@ public extension MPAKDeletedMessages {
         updatedAttributes: inout [MessageAttribute]
     ) {
         guard antiEditEnabled else { return }
+
+        guard shouldSaveForPeer(previousMessage.id.peerId) else { return }
+
+        if isPeerBot(previousMessage.author), !saveBots {
+            return
+        }
         
         let originalText = previousMessage.text
         guard !originalText.isEmpty else { return }
