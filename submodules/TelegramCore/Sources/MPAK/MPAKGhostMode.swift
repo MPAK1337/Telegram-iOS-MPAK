@@ -15,6 +15,8 @@ public enum MPAKGhostMode {
     private static let hideGroupCallVoiceKey = "mpak_ghost_hideGroupCallVoice"
     private static let hideGameActivityKey = "mpak_ghost_hideGameActivity"
     private static let hideEmojiReactionsKey = "mpak_ghost_hideEmojiReactions"
+    private static let hideLocationSharingKey = "mpak_ghost_hideLocationSharing"
+    private static let hideContactSharingKey = "mpak_ghost_hideContactSharing"
 
     public static var hideTyping: Bool {
         get { UserDefaults.standard.bool(forKey: hideTypingKey) }
@@ -69,5 +71,15 @@ public enum MPAKGhostMode {
     public static var hideEmojiReactions: Bool {
         get { UserDefaults.standard.bool(forKey: hideEmojiReactionsKey) }
         set { UserDefaults.standard.setValue(newValue, forKey: hideEmojiReactionsKey) }
+    }
+
+    public static var hideLocationSharing: Bool {
+        get { UserDefaults.standard.bool(forKey: hideLocationSharingKey) }
+        set { UserDefaults.standard.setValue(newValue, forKey: hideLocationSharingKey) }
+    }
+
+    public static var hideContactSharing: Bool {
+        get { UserDefaults.standard.bool(forKey: hideContactSharingKey) }
+        set { UserDefaults.standard.setValue(newValue, forKey: hideContactSharingKey) }
     }
 }

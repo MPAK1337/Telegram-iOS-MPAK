@@ -56,6 +56,9 @@ private enum SGBoolSetting: String {
     case mpakSaveGroupChats
     case mpakSaveChannels
     case mpakSaveBots
+    case mpakLocalPremium
+    case mpakHideLocationSharing
+    case mpakHideContactSharing
     case hidePhoneInSettings
     case showTabNames
     case showContactsTab
@@ -344,6 +347,10 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.AntiDelete.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiEdit, value: MPAKSettings.antiEditEnabled, text: i18n("MPAK.EditHistory", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.EditHistory.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakHideLocationSharing, value: MPAKGhostMode.hideLocationSharing, text: i18n("MPAK.Ghost.HideLocation", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakHideContactSharing, value: MPAKGhostMode.hideContactSharing, text: i18n("MPAK.Ghost.HideContact", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakLocalPremium, value: MPAKPremium.forcePremium, text: i18n("MPAK.LocalPremium", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.LocalPremium.Notice", lang)))
     
     // MPAK Chat Filters (show if any MPAK feature enabled)
     if MPAKSettings.antiDeleteEnabled || MPAKSettings.antiEditEnabled {
@@ -405,6 +412,12 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             MPAKSettings.saveChannels = value
         case .mpakSaveBots:
             MPAKSettings.saveBots = value
+        case .mpakLocalPremium:
+            MPAKPremium.forcePremium = value
+        case .mpakHideLocationSharing:
+            MPAKGhostMode.hideLocationSharing = value
+        case .mpakHideContactSharing:
+            MPAKGhostMode.hideContactSharing = value
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()

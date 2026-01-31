@@ -120,8 +120,12 @@ extension ChatControllerImpl {
         
         var availableButtons: [AttachmentButtonType] = [.gallery, .file]
         if banSendText == nil {
-            availableButtons.append(.location)
-            availableButtons.append(.contact)
+            if !MPAKGhostMode.hideLocationSharing {
+                availableButtons.append(.location)
+            }
+            if !MPAKGhostMode.hideContactSharing {
+                availableButtons.append(.contact)
+            }
         }
                 
         if canSendPolls {
@@ -387,6 +391,9 @@ extension ChatControllerImpl {
                         completion(controller, controller.mediaPickerContext)
                     }
                 case .location:
+                    if MPAKGhostMode.hideLocationSharing {
+                        return
+                    }
                     strongSelf.controllerNavigationDisposable.set(nil)
                     let existingController = currentLocationController.with { $0 }
                     if let controller = existingController {
@@ -446,6 +453,9 @@ extension ChatControllerImpl {
                         let _ = currentLocationController.swap(controller)
                     })
                 case .contact:
+                    if MPAKGhostMode.hideContactSharing {
+                        return
+                    }
                     let contactsController = ContactSelectionControllerImpl(ContactSelectionControllerParams(context: strongSelf.context, style: .glass, updatedPresentationData: strongSelf.updatedPresentationData, title: { $0.Contacts_Title }, displayDeviceContacts: true, multipleSelection: .always, requirePhoneNumbers: true))
                     contactsController.presentScheduleTimePicker = { [weak self] completion in
                         if let strongSelf = self {

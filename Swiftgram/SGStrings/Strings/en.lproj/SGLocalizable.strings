@@ -279,6 +279,10 @@
 "MPAK.AntiDelete.Notice" = "Keep deleted messages visible with reduced opacity and trash icon.";
 "MPAK.EditHistory" = "Edit History";
 "MPAK.EditHistory.Notice" = "Save all versions of edited messages. View with long-press menu.";
+"MPAK.Ghost.HideLocation" = "Hide Location Activity";
+"MPAK.Ghost.HideContact" = "Hide Contact Activity";
+"MPAK.LocalPremium" = "Local Premium";
+"MPAK.LocalPremium.Notice" = "Unlock premium limits locally (folders, pins, chats in folders).";
 
 "MPAK.ChatFilters.Header" = "SAVE FROM CHATS";
 "MPAK.ChatFilters.PrivateChats" = "Private Chats";

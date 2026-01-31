@@ -279,6 +279,10 @@
 "MPAK.AntiDelete.Notice" = "Сохранять удалённые сообщения с пониженной прозрачностью и иконкой корзины.";
 "MPAK.EditHistory" = "История Редактирования";
 "MPAK.EditHistory.Notice" = "Сохранять все версии отредактированных сообщений. Просмотр через меню долгого нажатия.";
+"MPAK.Ghost.HideLocation" = "Скрывать активность локации";
+"MPAK.Ghost.HideContact" = "Скрывать активность контакта";
+"MPAK.LocalPremium" = "Локальный Premium";
+"MPAK.LocalPremium.Notice" = "Снять лимиты локально (папки, закрепы, чаты в папках).";
 
 "MPAK.ChatFilters.Header" = "СОХРАНЯТЬ ИЗ ЧАТОВ";
 "MPAK.ChatFilters.PrivateChats" = "Личные чаты";
