@@ -82,6 +82,8 @@ class BazelCommandLine:
 
             # Disable WatchApp target by default to avoid signing requirements in unsigned builds.
             '--//Telegram:disableWatchApp',
+            # Disable extensions by default to avoid signing requirements in unsigned builds.
+            '--//Telegram:disableExtensions',
         ]
 
         self.common_debug_args = [

@@ -28,6 +28,15 @@ jobs:
           cp -R $GITHUB_WORKSPACE /Users/Shared/
           mv /Users/Shared/$(basename $GITHUB_WORKSPACE) /Users/Shared/telegram-ios
 
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            /private/var/tmp/_bazel_containerhost
+          key: bazel-macos13-${{ hashFiles('WORKSPACE', 'MODULE.bazel', 'MODULE.bazel.lock', '**/BUILD', '**/*.bazel', 'build-system/**') }}
+          restore-keys: |
+            bazel-macos13-
+
       - name: Build the App
         run: |
           set -x

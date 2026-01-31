@@ -35,9 +35,8 @@ jobs:
           path: |
             ~/bazel-disk-cache
             ~/.cache/bazel
-          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
+          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'MODULE.bazel', 'MODULE.bazel.lock', '**/BUILD', '**/*.bazel', 'build-system/**') }}
           restore-keys: |
-            bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-
             bazel-macos26-
             
       - name: Build Swiftgram IPA (Unsigned)
