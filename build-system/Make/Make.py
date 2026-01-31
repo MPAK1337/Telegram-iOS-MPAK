@@ -76,9 +76,12 @@ class BazelCommandLine:
             # If enabled the skip function bodies frontend flag is passed when using derived
             # files generation.
             '--features=swift.skip_function_bodies_for_derived_files',
-            
+
             # Set the number of parallel processes to match the available CPU core count.
             '--jobs={}'.format(os.cpu_count()),
+
+            # Disable WatchApp target by default to avoid signing requirements in unsigned builds.
+            '--//Telegram:disableWatchApp',
         ]
 
         self.common_debug_args = [

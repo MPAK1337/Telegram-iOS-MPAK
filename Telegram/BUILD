@@ -70,6 +70,12 @@ bool_flag(
 )
 
 bool_flag(
+    name = "disableWatchApp",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
     name = "disableProvisioningProfiles",
     build_setting_default = False,
     visibility = ["//visibility:public"],
@@ -85,6 +91,13 @@ config_setting(
     name = "disableExtensionsSetting",
     flag_values = {
         ":disableExtensions": "True",
+    },
+)
+
+config_setting(
+    name = "disableWatchAppSetting",
+    flag_values = {
+        ":disableWatchApp": "True",
     },
 )
 
@@ -2072,6 +2085,7 @@ ios_application(
     }),
     watch_application = select({
         ":disableExtensionsSetting": None,
+        ":disableWatchAppSetting": None,
         "//conditions:default": ":TelegramWatchApp",
     }), # MARK: Swiftgram
     deps = [
