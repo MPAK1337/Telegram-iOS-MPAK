@@ -1193,7 +1193,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         
         // MPAK Mod: History button for edited messages
         if MPAKSettings.antiEditEnabled {
-            let editHistory = MPAKDeletedMessages.getEditHistory(message: messages[0])
+            let editHistory = messages[0].mpakAttribute?.editHistory ?? []
             if !editHistory.isEmpty {
                 actions.append(.action(ContextMenuActionItem(text: MPAKSettings.Strings.historyButtonTitle, icon: { theme in
                     return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.actionSheet.primaryTextColor)
@@ -1202,13 +1202,15 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                         // Show edit history
                         var historyText = ""
                         for (index, entry) in editHistory.enumerated() {
-                            let date = Date(timeIntervalSince1970: Double(entry.date))
+                            let date = Date(timeIntervalSince1970: Double(entry.timestamp))
                             let formatter = DateFormatter()
                             formatter.dateStyle = .short
                             formatter.timeStyle = .short
-                            historyText += "\(index + 1). [\(formatter.string(from: date))]\n\(entry.text)\n"
-                            if let media = entry.mediaDescription {
-                                historyText += "\(media)\n"
+                            historyText += "\(index + 1). [\(formatter.string(from: date))]\n"
+                            if entry.originalText == entry.finalText {
+                                historyText += "\(entry.finalText)\n"
+                            } else {
+                                historyText += "→ \(entry.originalText)\n→ \(entry.finalText)\n"
                             }
                             historyText += "\n"
                         }
