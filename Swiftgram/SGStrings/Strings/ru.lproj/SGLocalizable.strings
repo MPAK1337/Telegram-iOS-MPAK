@@ -275,12 +275,39 @@
 
 /* MPAK Mod */
 "MPAK.Header" = "MPAK МОД";
+"MPAK.Messages.Header" = "СООБЩЕНИЯ";
 "MPAK.AntiDelete" = "Анти-Удаление";
 "MPAK.AntiDelete.Notice" = "Сохранять удалённые сообщения с пониженной прозрачностью и иконкой корзины.";
 "MPAK.EditHistory" = "История Редактирования";
 "MPAK.EditHistory.Notice" = "Сохранять все версии отредактированных сообщений. Просмотр через меню долгого нажатия.";
+"MPAK.DeleteAll.Notice" = "Очистить все локально сохранённые флаги удаления.";
 "MPAK.Ghost.HideLocation" = "Скрывать активность локации";
+"MPAK.Ghost.HideLocation.Notice" = "Скрывать активность отправки локации в чатах.";
 "MPAK.Ghost.HideContact" = "Скрывать активность контакта";
+"MPAK.Ghost.HideContact.Notice" = "Скрывать активность отправки контактов в чатах.";
+"MPAK.Ghost.Header" = "ПРИЗРАЧНЫЙ РЕЖИМ";
+"MPAK.Ghost.HideOnline" = "Скрывать статус онлайн";
+"MPAK.Ghost.HideOnline.Notice" = "Не показывать, что вы онлайн.";
+"MPAK.Ghost.HideTyping" = "Скрывать статус печати";
+"MPAK.Ghost.HideTyping.Notice" = "Не показывать, что вы печатаете.";
+"MPAK.Ghost.HideReadReceipts" = "Скрывать прочтение";
+"MPAK.Ghost.HideReadReceipts.Notice" = "Не отправлять отметки о прочтении.";
+"MPAK.Ghost.HideStoryViews" = "Скрывать просмотры историй";
+"MPAK.Ghost.HideStoryViews.Notice" = "Не отмечать истории как просмотренные.";
+"MPAK.Ghost.HideEmojiReactions" = "Скрывать реакции";
+"MPAK.Ghost.HideEmojiReactions.Notice" = "Скрывать активность реакций.";
+"MPAK.Ghost.HideAudioRecording" = "Скрывать запись голоса";
+"MPAK.Ghost.HideAudioRecording.Notice" = "Не показывать запись голосовых.";
+"MPAK.Ghost.HideVideoMessages" = "Скрывать видеосообщения";
+"MPAK.Ghost.HideVideoMessages.Notice" = "Не показывать запись видео.";
+"MPAK.Ghost.HideUploads" = "Скрывать загрузку файлов";
+"MPAK.Ghost.HideUploads.Notice" = "Не показывать активность загрузки.";
+"MPAK.Ghost.HideStickerInteractions" = "Скрывать стикеры";
+"MPAK.Ghost.HideStickerInteractions.Notice" = "Не показывать активность стикеров.";
+"MPAK.Ghost.HideGroupCallVoice" = "Скрывать голос в звонках";
+"MPAK.Ghost.HideGroupCallVoice.Notice" = "Не показывать голосовую активность в групповых звонках.";
+"MPAK.Ghost.HideGameActivity" = "Скрывать игры";
+"MPAK.Ghost.HideGameActivity.Notice" = "Не показывать игровую активность.";
 "MPAK.LocalPremium" = "Локальный Premium";
 "MPAK.LocalPremium.Notice" = "Снять лимиты локально (папки, закрепы, чаты в папках).";
 "MPAK.MenuTitle" = "MPAK Мод";
@@ -290,6 +317,19 @@
 "MPAK.ChatFilters.Groups" = "Группы";
 "MPAK.ChatFilters.Channels" = "Каналы";
 "MPAK.ChatFilters.Bots" = "Боты";
+"MPAK.ChatFilters.Notice" = "Выберите типы чатов для сохранения удалённых и отредактированных сообщений.";
+
+"MPAK.Protection.Header" = "ЗАЩИТА";
+"MPAK.Protection.DisableScreenshotNotifications" = "Отключить уведомления о скриншотах";
+"MPAK.Protection.DisableScreenshotNotifications.Notice" = "Не отправлять уведомления о скриншотах.";
+"MPAK.Protection.DisableScreenCaptureAlerts" = "Отключить предупреждения о записи";
+"MPAK.Protection.DisableScreenCaptureAlerts.Notice" = "Скрывать предупреждения о записи экрана.";
+"MPAK.Protection.AllowProtectedContentSave" = "Разрешить сохранение защищённого";
+"MPAK.Protection.AllowProtectedContentSave.Notice" = "Разрешить сохранение или копирование защищённого контента.";
+"MPAK.Protection.AllowSelfDestructSave" = "Разрешить сохранение самоуничтожения";
+"MPAK.Protection.AllowSelfDestructSave.Notice" = "Разрешить сохранение самоуничтожаемых медиа.";
+
+"MPAK.Premium.Header" = "PREMIUM";
 
 "MPAK.DeleteAll" = "Удалить все сохранённые";
 "MPAK.DeleteAll.Confirm.Title" = "Удалить все сохранённые сообщения?";

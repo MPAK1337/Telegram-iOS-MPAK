@@ -46,6 +46,9 @@ private enum SGControllerSection: Int32, SGItemListSection {
     case other
     case mpak
     case mpakFilters
+    case mpakGhost
+    case mpakProtection
+    case mpakPremium
 }
 
 private enum SGBoolSetting: String {
@@ -57,8 +60,23 @@ private enum SGBoolSetting: String {
     case mpakSaveChannels
     case mpakSaveBots
     case mpakLocalPremium
+    case mpakHideTyping
+    case mpakHideOnlineStatus
+    case mpakHideReadReceipts
+    case mpakHideStoryViews
+    case mpakHideAudioRecording
+    case mpakHideVideoMessages
+    case mpakHideUploads
+    case mpakHideStickerInteractions
+    case mpakHideGroupCallVoice
+    case mpakHideGameActivity
+    case mpakHideEmojiReactions
     case mpakHideLocationSharing
     case mpakHideContactSharing
+    case mpakDisableScreenshotNotifications
+    case mpakDisableScreenCaptureAlerts
+    case mpakAllowProtectedContentSave
+    case mpakAllowSelfDestructSave
     case hidePhoneInSettings
     case showTabNames
     case showContactsTab
@@ -139,6 +157,10 @@ private enum SGSliderSetting: String {
 private enum SGDisclosureLink: String {
     case contentSettings
     case languageSettings
+}
+
+private enum SGSettingsAction: Hashable {
+    case mpakDeleteAll
 }
 
 private struct PeerNameColorScreenState: Equatable {
@@ -341,25 +363,67 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.notice(id: id.count, section: .other, text: i18n("Settings.HidePhoneInSettingsUI.Notice", lang)))
     
 
-    // MPAK Mod: Settings Section
-    entries.append(.header(id: id.count, section: .mpak, text: i18n("MPAK.Header", lang), badge: nil))
+    // MPAK Mod: Messages
+    entries.append(.header(id: id.count, section: .mpak, text: i18n("MPAK.Messages.Header", lang), badge: nil))
     entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiDelete, value: MPAKSettings.antiDeleteEnabled, text: i18n("MPAK.AntiDelete", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.AntiDelete.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakAntiEdit, value: MPAKSettings.antiEditEnabled, text: i18n("MPAK.EditHistory", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.EditHistory.Notice", lang)))
-    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakHideLocationSharing, value: MPAKGhostMode.hideLocationSharing, text: i18n("MPAK.Ghost.HideLocation", lang), enabled: true))
-    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakHideContactSharing, value: MPAKGhostMode.hideContactSharing, text: i18n("MPAK.Ghost.HideContact", lang), enabled: true))
-    entries.append(.toggle(id: id.count, section: .mpak, settingName: .mpakLocalPremium, value: MPAKPremium.forcePremium, text: i18n("MPAK.LocalPremium", lang), enabled: true))
-    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.LocalPremium.Notice", lang)))
+    entries.append(.action(id: id.count, section: .mpak, actionType: SGSettingsAction.mpakDeleteAll, text: i18n("MPAK.DeleteAll", lang), kind: .destructive))
+    entries.append(.notice(id: id.count, section: .mpak, text: i18n("MPAK.DeleteAll.Notice", lang)))
     
-    // MPAK Chat Filters (show if any MPAK feature enabled)
-    if MPAKSettings.antiDeleteEnabled || MPAKSettings.antiEditEnabled {
-        entries.append(.header(id: id.count, section: .mpakFilters, text: i18n("MPAK.ChatFilters.Header", lang), badge: nil))
-        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSavePrivateChats, value: MPAKSettings.savePrivateChats, text: i18n("MPAK.ChatFilters.PrivateChats", lang), enabled: true))
-        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveGroupChats, value: MPAKSettings.saveGroupChats, text: i18n("MPAK.ChatFilters.Groups", lang), enabled: true))
-        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveChannels, value: MPAKSettings.saveChannels, text: i18n("MPAK.ChatFilters.Channels", lang), enabled: true))
-        entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveBots, value: MPAKSettings.saveBots, text: i18n("MPAK.ChatFilters.Bots", lang), enabled: true))
-    }
+    // MPAK Chat Filters
+    entries.append(.header(id: id.count, section: .mpakFilters, text: i18n("MPAK.ChatFilters.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSavePrivateChats, value: MPAKSettings.savePrivateChats, text: i18n("MPAK.ChatFilters.PrivateChats", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveGroupChats, value: MPAKSettings.saveGroupChats, text: i18n("MPAK.ChatFilters.Groups", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveChannels, value: MPAKSettings.saveChannels, text: i18n("MPAK.ChatFilters.Channels", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mpakFilters, settingName: .mpakSaveBots, value: MPAKSettings.saveBots, text: i18n("MPAK.ChatFilters.Bots", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakFilters, text: i18n("MPAK.ChatFilters.Notice", lang)))
+    
+    // MPAK Ghost Mode
+    entries.append(.header(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideOnlineStatus, value: MPAKGhostMode.hideOnlineStatus, text: i18n("MPAK.Ghost.HideOnline", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideOnline.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideTyping, value: MPAKGhostMode.hideTyping, text: i18n("MPAK.Ghost.HideTyping", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideTyping.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideReadReceipts, value: MPAKGhostMode.hideReadReceipts, text: i18n("MPAK.Ghost.HideReadReceipts", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideReadReceipts.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideStoryViews, value: MPAKGhostMode.hideStoryViews, text: i18n("MPAK.Ghost.HideStoryViews", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideStoryViews.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideEmojiReactions, value: MPAKGhostMode.hideEmojiReactions, text: i18n("MPAK.Ghost.HideEmojiReactions", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideEmojiReactions.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideAudioRecording, value: MPAKGhostMode.hideAudioRecording, text: i18n("MPAK.Ghost.HideAudioRecording", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideAudioRecording.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideVideoMessages, value: MPAKGhostMode.hideVideoMessages, text: i18n("MPAK.Ghost.HideVideoMessages", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideVideoMessages.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideUploads, value: MPAKGhostMode.hideUploads, text: i18n("MPAK.Ghost.HideUploads", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideUploads.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideStickerInteractions, value: MPAKGhostMode.hideStickerInteractions, text: i18n("MPAK.Ghost.HideStickerInteractions", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideStickerInteractions.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideGroupCallVoice, value: MPAKGhostMode.hideGroupCallVoice, text: i18n("MPAK.Ghost.HideGroupCallVoice", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideGroupCallVoice.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideGameActivity, value: MPAKGhostMode.hideGameActivity, text: i18n("MPAK.Ghost.HideGameActivity", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideGameActivity.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideLocationSharing, value: MPAKGhostMode.hideLocationSharing, text: i18n("MPAK.Ghost.HideLocation", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideLocation.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakGhost, settingName: .mpakHideContactSharing, value: MPAKGhostMode.hideContactSharing, text: i18n("MPAK.Ghost.HideContact", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakGhost, text: i18n("MPAK.Ghost.HideContact.Notice", lang)))
+    
+    // MPAK Protection
+    entries.append(.header(id: id.count, section: .mpakProtection, text: i18n("MPAK.Protection.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpakProtection, settingName: .mpakDisableScreenshotNotifications, value: MPAKProtection.disableScreenshotNotifications, text: i18n("MPAK.Protection.DisableScreenshotNotifications", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakProtection, text: i18n("MPAK.Protection.DisableScreenshotNotifications.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakProtection, settingName: .mpakDisableScreenCaptureAlerts, value: MPAKProtection.disableScreenCaptureAlerts, text: i18n("MPAK.Protection.DisableScreenCaptureAlerts", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakProtection, text: i18n("MPAK.Protection.DisableScreenCaptureAlerts.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakProtection, settingName: .mpakAllowProtectedContentSave, value: MPAKProtection.allowProtectedContentSave, text: i18n("MPAK.Protection.AllowProtectedContentSave", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakProtection, text: i18n("MPAK.Protection.AllowProtectedContentSave.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mpakProtection, settingName: .mpakAllowSelfDestructSave, value: MPAKProtection.allowSelfDestructSave, text: i18n("MPAK.Protection.AllowSelfDestructSave", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakProtection, text: i18n("MPAK.Protection.AllowSelfDestructSave.Notice", lang)))
+    
+    // MPAK Premium
+    entries.append(.header(id: id.count, section: .mpakPremium, text: i18n("MPAK.Premium.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mpakPremium, settingName: .mpakLocalPremium, value: MPAKPremium.forcePremium, text: i18n("MPAK.LocalPremium", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mpakPremium, text: i18n("MPAK.LocalPremium.Notice", lang)))
     
     // MPAK Developer info
     entries.append(.notice(id: id.count, section: .mpak, text: "\(i18n("MPAK.Developer", lang)): @naebx | \(i18n("MPAK.Version", lang)): \(MPAKSettings.modVersion)"))
@@ -418,10 +482,40 @@ private func makeSettingsController(context: AccountContext, titleProvider: @esc
             MPAKSettings.saveBots = value
         case .mpakLocalPremium:
             MPAKPremium.forcePremium = value
+        case .mpakHideTyping:
+            MPAKGhostMode.hideTyping = value
+        case .mpakHideOnlineStatus:
+            MPAKGhostMode.hideOnlineStatus = value
+        case .mpakHideReadReceipts:
+            MPAKGhostMode.hideReadReceipts = value
+        case .mpakHideStoryViews:
+            MPAKGhostMode.hideStoryViews = value
+        case .mpakHideAudioRecording:
+            MPAKGhostMode.hideAudioRecording = value
+        case .mpakHideVideoMessages:
+            MPAKGhostMode.hideVideoMessages = value
+        case .mpakHideUploads:
+            MPAKGhostMode.hideUploads = value
+        case .mpakHideStickerInteractions:
+            MPAKGhostMode.hideStickerInteractions = value
+        case .mpakHideGroupCallVoice:
+            MPAKGhostMode.hideGroupCallVoice = value
+        case .mpakHideGameActivity:
+            MPAKGhostMode.hideGameActivity = value
+        case .mpakHideEmojiReactions:
+            MPAKGhostMode.hideEmojiReactions = value
         case .mpakHideLocationSharing:
             MPAKGhostMode.hideLocationSharing = value
         case .mpakHideContactSharing:
             MPAKGhostMode.hideContactSharing = value
+        case .mpakDisableScreenshotNotifications:
+            MPAKProtection.disableScreenshotNotifications = value
+        case .mpakDisableScreenCaptureAlerts:
+            MPAKProtection.disableScreenCaptureAlerts = value
+        case .mpakAllowProtectedContentSave:
+            MPAKProtection.allowProtectedContentSave = value
+        case .mpakAllowSelfDestructSave:
+            MPAKProtection.allowSelfDestructSave = value
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
@@ -771,10 +865,30 @@ private func makeSettingsController(context: AccountContext, titleProvider: @esc
                     strongContext.sharedContext.applicationBindings.openUrl(url)
                 })
         }
-    }, searchInput: { searchQuery in
-        updateState { state in
-            var updatedState = state
-            updatedState.searchQuery = searchQuery
+        }, action: { action in
+            guard let action = action as? SGSettingsAction else {
+                return
+            }
+            switch action {
+            case .mpakDeleteAll:
+                let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+                let controller = textAlertController(
+                    context: context,
+                    title: i18n("MPAK.DeleteAll.Confirm.Title", presentationData.strings.baseLanguageCode),
+                    text: i18n("MPAK.DeleteAll.Confirm.Text", presentationData.strings.baseLanguageCode),
+                    actions: [
+                        TextAlertAction(type: .genericAction, title: presentationData.strings.Common_Cancel, action: {}),
+                        TextAlertAction(type: .destructiveAction, title: i18n("MPAK.DeleteAll.Confirm.Delete", presentationData.strings.baseLanguageCode), action: {
+                            MPAKDeletedMessages.clearAllMPAKData()
+                        })
+                    ]
+                )
+                presentControllerImpl?(controller, nil)
+            }
+        }, searchInput: { searchQuery in
+            updateState { state in
+                var updatedState = state
+                updatedState.searchQuery = searchQuery
             return updatedState
         }
     })
@@ -863,5 +977,5 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
 public func mpakSettingsController(context: AccountContext/*, focusOnItemTag: Int? = nil*/) -> ViewController {
     return makeSettingsController(context: context, titleProvider: { presentationData in
         i18n("MPAK.MenuTitle", presentationData.strings.baseLanguageCode)
-    }, allowedSections: [.mpak, .mpakFilters])
+    }, allowedSections: [.mpak, .mpakFilters, .mpakGhost, .mpakProtection, .mpakPremium])
 }

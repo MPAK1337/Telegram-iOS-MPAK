@@ -275,12 +275,39 @@
 
 /* MPAK Mod */
 "MPAK.Header" = "MPAK MOD";
+"MPAK.Messages.Header" = "MESSAGES";
 "MPAK.AntiDelete" = "Anti-Delete";
 "MPAK.AntiDelete.Notice" = "Keep deleted messages visible with reduced opacity and trash icon.";
 "MPAK.EditHistory" = "Edit History";
 "MPAK.EditHistory.Notice" = "Save all versions of edited messages. View with long-press menu.";
+"MPAK.DeleteAll.Notice" = "Clear all locally saved delete flags.";
 "MPAK.Ghost.HideLocation" = "Hide Location Activity";
+"MPAK.Ghost.HideLocation.Notice" = "Hide location sharing activity in chats.";
 "MPAK.Ghost.HideContact" = "Hide Contact Activity";
+"MPAK.Ghost.HideContact.Notice" = "Hide contact sharing activity in chats.";
+"MPAK.Ghost.Header" = "GHOST MODE";
+"MPAK.Ghost.HideOnline" = "Hide Online Status";
+"MPAK.Ghost.HideOnline.Notice" = "Don't show when you're online.";
+"MPAK.Ghost.HideTyping" = "Hide Typing Status";
+"MPAK.Ghost.HideTyping.Notice" = "Don't show typing activity.";
+"MPAK.Ghost.HideReadReceipts" = "Hide Read Receipts";
+"MPAK.Ghost.HideReadReceipts.Notice" = "Don't send read confirmations.";
+"MPAK.Ghost.HideStoryViews" = "Hide Story Views";
+"MPAK.Ghost.HideStoryViews.Notice" = "Don't mark stories as viewed.";
+"MPAK.Ghost.HideEmojiReactions" = "Hide Emoji Reactions";
+"MPAK.Ghost.HideEmojiReactions.Notice" = "Hide reaction activity.";
+"MPAK.Ghost.HideAudioRecording" = "Hide Voice Recording";
+"MPAK.Ghost.HideAudioRecording.Notice" = "Don't show voice recording activity.";
+"MPAK.Ghost.HideVideoMessages" = "Hide Video Messages";
+"MPAK.Ghost.HideVideoMessages.Notice" = "Don't show video recording activity.";
+"MPAK.Ghost.HideUploads" = "Hide Upload Activity";
+"MPAK.Ghost.HideUploads.Notice" = "Don't show file upload activity.";
+"MPAK.Ghost.HideStickerInteractions" = "Hide Sticker Interactions";
+"MPAK.Ghost.HideStickerInteractions.Notice" = "Don't show sticker interaction activity.";
+"MPAK.Ghost.HideGroupCallVoice" = "Hide Group Call Voice";
+"MPAK.Ghost.HideGroupCallVoice.Notice" = "Don't show voice activity in group calls.";
+"MPAK.Ghost.HideGameActivity" = "Hide Game Activity";
+"MPAK.Ghost.HideGameActivity.Notice" = "Don't show game activity.";
 "MPAK.LocalPremium" = "Local Premium";
 "MPAK.LocalPremium.Notice" = "Unlock premium limits locally (folders, pins, chats in folders).";
 "MPAK.MenuTitle" = "MPAK Mod";
@@ -290,6 +317,19 @@
 "MPAK.ChatFilters.Groups" = "Groups";
 "MPAK.ChatFilters.Channels" = "Channels";
 "MPAK.ChatFilters.Bots" = "Bots";
+"MPAK.ChatFilters.Notice" = "Choose chat types for saving deleted or edited messages.";
+
+"MPAK.Protection.Header" = "PROTECTION";
+"MPAK.Protection.DisableScreenshotNotifications" = "Disable Screenshot Notifications";
+"MPAK.Protection.DisableScreenshotNotifications.Notice" = "Prevents screenshot alerts from being sent.";
+"MPAK.Protection.DisableScreenCaptureAlerts" = "Disable Screen Capture Alerts";
+"MPAK.Protection.DisableScreenCaptureAlerts.Notice" = "Suppress screen recording warnings.";
+"MPAK.Protection.AllowProtectedContentSave" = "Allow Saving Protected Content";
+"MPAK.Protection.AllowProtectedContentSave.Notice" = "Allow saving or copying protected content.";
+"MPAK.Protection.AllowSelfDestructSave" = "Allow Saving Self-Destruct Media";
+"MPAK.Protection.AllowSelfDestructSave.Notice" = "Allow saving self-destructing media.";
+
+"MPAK.Premium.Header" = "PREMIUM";
 
 "MPAK.DeleteAll" = "Delete All Saved";
 "MPAK.DeleteAll.Confirm.Title" = "Delete All Saved Messages?";
