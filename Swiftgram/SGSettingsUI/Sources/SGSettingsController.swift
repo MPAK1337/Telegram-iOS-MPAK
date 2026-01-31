@@ -152,7 +152,7 @@ private struct SGSettingsControllerState: Equatable {
 
 private typealias SGControllerEntry = SGItemListUIEntry<SGControllerSection, SGBoolSetting, SGSliderSetting, SGOneFromManySetting, SGDisclosureLink, AnyHashable>
 
-private func SGControllerEntries(presentationData: PresentationData, callListSettings: CallListSettings, experimentalUISettings: ExperimentalUISettings, SGSettings: SGUISettings, appConfiguration: AppConfiguration, nameColors: PeerNameColors, state: SGSettingsControllerState) -> [SGControllerEntry] {
+private func SGControllerEntries(presentationData: PresentationData, callListSettings: CallListSettings, experimentalUISettings: ExperimentalUISettings, SGSettings: SGUISettings, appConfiguration: AppConfiguration, nameColors: PeerNameColors, state: SGSettingsControllerState, allowedSections: Set<SGControllerSection>? = nil) -> [SGControllerEntry] {
     
     let lang = presentationData.strings.baseLanguageCode
     let strings = presentationData.strings
@@ -364,10 +364,14 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     // MPAK Developer info
     entries.append(.notice(id: id.count, section: .mpak, text: "\(i18n("MPAK.Developer", lang)): @naebx | \(i18n("MPAK.Version", lang)): \(MPAKSettings.modVersion)"))
     
-    return filterSGItemListUIEntrires(entries: entries, by: state.searchQuery)
+    let filteredEntries = filterSGItemListUIEntrires(entries: entries, by: state.searchQuery)
+    guard let allowedSections else {
+        return filteredEntries
+    }
+    return filteredEntries.filter { allowedSections.contains($0.section) }
 }
 
-public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int? = nil*/) -> ViewController {
+private func makeSettingsController(context: AccountContext, titleProvider: @escaping (PresentationData) -> String, allowedSections: Set<SGControllerSection>?/*, focusOnItemTag: Int? = nil*/) -> ViewController {
     var presentControllerImpl: ((ViewController, ViewControllerPresentationArguments?) -> Void)?
     var pushControllerImpl: ((ViewController) -> Void)?
 //    var getRootControllerImpl: (() -> UIViewController?)?
@@ -794,9 +798,10 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
         let callListSettings: CallListSettings = sharedData.entries[ApplicationSpecificSharedDataKeys.callListSettings]?.get(CallListSettings.self) ?? CallListSettings.defaultSettings
         let experimentalUISettings: ExperimentalUISettings = sharedData.entries[ApplicationSpecificSharedDataKeys.experimentalUISettings]?.get(ExperimentalUISettings.self) ?? ExperimentalUISettings.defaultSettings
         
-        let entries = SGControllerEntries(presentationData: presentationData, callListSettings: callListSettings, experimentalUISettings: experimentalUISettings, SGSettings: sgUISettings, appConfiguration: appConfiguration, nameColors: PeerNameColors.with(availableReplyColors: availableReplyColors, availableProfileColors: availableProfileColors), state: state)
+        let entries = SGControllerEntries(presentationData: presentationData, callListSettings: callListSettings, experimentalUISettings: experimentalUISettings, SGSettings: sgUISettings, appConfiguration: appConfiguration, nameColors: PeerNameColors.with(availableReplyColors: availableReplyColors, availableProfileColors: availableProfileColors), state: state, allowedSections: allowedSections)
         
-        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Swiftgram"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
+        let controllerTitle = titleProvider(presentationData)
+        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text(controllerTitle), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
         
         // TODO(swiftgram): focusOnItemTag support
         /* var index = 0
@@ -849,4 +854,14 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
     }
     return controller
 
+}
+
+public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int? = nil*/) -> ViewController {
+    return makeSettingsController(context: context, titleProvider: { _ in "Swiftgram" }, allowedSections: nil)
+}
+
+public func mpakSettingsController(context: AccountContext/*, focusOnItemTag: Int? = nil*/) -> ViewController {
+    return makeSettingsController(context: context, titleProvider: { presentationData in
+        i18n("MPAK.MenuTitle", presentationData.strings.baseLanguageCode)
+    }, allowedSections: [.mpak, .mpakFilters])
 }

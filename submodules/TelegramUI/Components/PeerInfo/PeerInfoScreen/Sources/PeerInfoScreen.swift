@@ -11106,7 +11106,7 @@ final class PeerInfoScreenNode: ViewControllerTracingNode, PeerInfoScreenNodePro
                 }
             }
         case .mpakMod:
-            self.controller?.push(sgSettingsController(context: self.context))
+            self.controller?.push(mpakSettingsController(context: self.context))
         case .avatar:
             self.controller?.openAvatarForEditing()
         case .edit:
