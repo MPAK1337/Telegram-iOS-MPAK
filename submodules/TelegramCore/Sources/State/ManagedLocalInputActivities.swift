@@ -157,6 +157,9 @@ private func requestActivity(postbox: Postbox, network: Network, accountPeerId: 
                     }
                 }
             }
+            if MPAKGhostMode.hideTyping {
+                return .complete()
+            }
             if let _ = peer as? TelegramUser {
                 if let presence = transaction.getPeerPresence(peerId: peerId) as? TelegramUserPresence {
                     switch presence.status {
