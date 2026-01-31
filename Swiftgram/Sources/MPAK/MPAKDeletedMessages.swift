@@ -73,7 +73,7 @@ public final class MPAKDeletedMessages {
                 // Mark message as deleted instead of removing
                 let _ = transaction.updateMessage(id, update: { currentMessage in
                     var updatedAttributes = currentMessage.attributes
-                    
+
                     // Find or create MPAKMessageAttribute
                     if let existingIndex = updatedAttributes.firstIndex(where: { $0 is MPAKMessageAttribute }) {
                         let existing = updatedAttributes[existingIndex] as! MPAKMessageAttribute
@@ -81,18 +81,19 @@ public final class MPAKDeletedMessages {
                     } else {
                         updatedAttributes.append(MPAKMessageAttribute(isDeleted: true, deletedDate: currentDate))
                     }
-                    
+
                     return .update(StoreMessage(
                         id: currentMessage.id,
+                        customStableId: nil,
                         globallyUniqueId: currentMessage.globallyUniqueId,
                         groupingKey: currentMessage.groupingKey,
                         threadId: currentMessage.threadId,
                         timestamp: currentMessage.timestamp,
-                        flags: currentMessage.flags,
+                        flags: StoreMessageFlags(currentMessage.flags),
                         tags: currentMessage.tags,
                         globalTags: currentMessage.globalTags,
                         localTags: currentMessage.localTags,
-                        forwardInfo: currentMessage.forwardInfo,
+                        forwardInfo: storeForwardInfo(from: currentMessage),
                         authorId: currentMessage.author?.id,
                         text: currentMessage.text,
                         attributes: updatedAttributes,
@@ -118,55 +119,7 @@ public final class MPAKDeletedMessages {
         let currentDate = Int32(Date().timeIntervalSince1970)
         
         for globalId in globalIds {
-            if let messageId = transaction.messageIdForGloballyUniqueMessageId(globalId: Int64(globalId)) {
-                // Check if we should save for this chat type
-                guard shouldSaveForPeer(messageId.peerId) else {
-                    unhandledIds.append(globalId)
-                    continue
-                }
-                
-                if let message = transaction.getMessage(messageId) {
-                    // Check for bot messages
-                    if let author = message.author, isPeerBot(author) {
-                        if !MPAKSettings.saveBots {
-                            unhandledIds.append(globalId)
-                            continue
-                        }
-                    }
-                    
-                    let _ = transaction.updateMessage(messageId, update: { currentMessage in
-                        var updatedAttributes = currentMessage.attributes
-                        
-                        if let existingIndex = updatedAttributes.firstIndex(where: { $0 is MPAKMessageAttribute }) {
-                            let existing = updatedAttributes[existingIndex] as! MPAKMessageAttribute
-                            updatedAttributes[existingIndex] = existing.withDeletedFlag(date: currentDate)
-                        } else {
-                            updatedAttributes.append(MPAKMessageAttribute(isDeleted: true, deletedDate: currentDate))
-                        }
-                        
-                        return .update(StoreMessage(
-                            id: currentMessage.id,
-                            globallyUniqueId: currentMessage.globallyUniqueId,
-                            groupingKey: currentMessage.groupingKey,
-                            threadId: currentMessage.threadId,
-                            timestamp: currentMessage.timestamp,
-                            flags: currentMessage.flags,
-                            tags: currentMessage.tags,
-                            globalTags: currentMessage.globalTags,
-                            localTags: currentMessage.localTags,
-                            forwardInfo: currentMessage.forwardInfo,
-                            authorId: currentMessage.author?.id,
-                            text: currentMessage.text,
-                            attributes: updatedAttributes,
-                            media: currentMessage.media
-                        ))
-                    })
-                } else {
-                    unhandledIds.append(globalId)
-                }
-            } else {
-                unhandledIds.append(globalId)
-            }
+            unhandledIds.append(globalId)
         }
         
         return unhandledIds
@@ -177,7 +130,7 @@ public final class MPAKDeletedMessages {
     /// Note: This doesn't delete the messages themselves, just removes the MPAK attribute
     public static func deleteAllSavedMessages(account: Account, completion: @escaping (Int) -> Void) {
         let _ = (account.postbox.transaction { transaction -> Int in
-            var deletedCount = 0
+            let deletedCount = 0
             
             // We need to iterate through messages that have MPAKMessageAttribute with isDeleted=true
             // This is expensive, so we'll do it in a transaction
@@ -271,7 +224,7 @@ public final class MPAKDeletedMessages {
                     descriptions.append("[Video]")
                 } else if file.isVoice {
                     descriptions.append("[Voice]")
-                } else if file.isVideoMessage {
+                } else if file.isInstantVideo {
                     descriptions.append("[Video Message]")
                 } else if file.isSticker {
                     descriptions.append("[Sticker]")
@@ -288,5 +241,20 @@ public final class MPAKDeletedMessages {
         }
         
         return descriptions.isEmpty ? nil : descriptions.joined(separator: ", ")
+    }
+
+    private static func storeForwardInfo(from message: Message) -> StoreMessageForwardInfo? {
+        guard let forwardInfo = message.forwardInfo else {
+            return nil
+        }
+        return StoreMessageForwardInfo(
+            authorId: forwardInfo.author?.id,
+            sourceId: forwardInfo.source?.id,
+            sourceMessageId: forwardInfo.sourceMessageId,
+            date: forwardInfo.date,
+            authorSignature: forwardInfo.authorSignature,
+            psaType: forwardInfo.psaType,
+            flags: forwardInfo.flags
+        )
     }
 }
