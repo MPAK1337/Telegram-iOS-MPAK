@@ -432,7 +432,12 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     guard let allowedSections else {
         return filteredEntries
     }
-    return filteredEntries.filter { allowedSections.contains($0.section) }
+    return filteredEntries.filter {
+        guard let section = SGControllerSection(rawValue: $0.section) else {
+            return false
+        }
+        return allowedSections.contains(section)
+    }
 }
 
 private func makeSettingsController(context: AccountContext, titleProvider: @escaping (PresentationData) -> String, allowedSections: Set<SGControllerSection>?/*, focusOnItemTag: Int? = nil*/) -> ViewController {
