@@ -1195,7 +1195,8 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         if MPAKSettings.antiEditEnabled {
             let editHistory = messages[0].mpakAttribute?.editHistory ?? []
             if !editHistory.isEmpty {
-                actions.append(.action(ContextMenuActionItem(text: MPAKSettings.Strings.historyButtonTitle, icon: { theme in
+                let historyButtonTitle = i18n("MPAK.History.ContextMenu", chatPresentationInterfaceState.strings.baseLanguageCode)
+                actions.append(.action(ContextMenuActionItem(text: historyButtonTitle, icon: { theme in
                     return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.actionSheet.primaryTextColor)
                 }, action: { c, _ in
                     c?.dismiss(result: .dismissWithoutContent, completion: {
@@ -1217,9 +1218,9 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                         
                         let alertController = textAlertController(
                             context: context,
-                            title: MPAKSettings.Strings.historyButtonTitle,
-                            text: historyText.isEmpty ? "No history" : historyText,
-                            actions: [TextAlertAction(type: .defaultAction, title: "OK", action: {})]
+                            title: i18n("MPAK.History.Title", chatPresentationInterfaceState.strings.baseLanguageCode),
+                            text: historyText.isEmpty ? i18n("MPAK.History.Empty", chatPresentationInterfaceState.strings.baseLanguageCode) : historyText,
+                            actions: [TextAlertAction(type: .defaultAction, title: chatPresentationInterfaceState.strings.Common_OK, action: {})]
                         )
                         controllerInteraction.presentController(alertController, nil)
                     })
