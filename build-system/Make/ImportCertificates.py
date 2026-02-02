@@ -23,6 +23,12 @@ def import_certificates(certificatesPath):
         keychain_name
     ], check_result=True)
 
+    run_executable_with_output('security', arguments=[
+        'default-keychain',
+        '-s',
+        keychain_name
+    ], check_result=True)
+
     existing_keychains = run_executable_with_output('security', arguments=['list-keychains', '-d', 'user'])
     existing_keychains.replace('"', '')
 
