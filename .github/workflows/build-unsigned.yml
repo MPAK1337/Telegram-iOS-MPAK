@@ -41,6 +41,7 @@ jobs:
             
       - name: Build Swiftgram IPA (Unsigned)
         run: |
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
