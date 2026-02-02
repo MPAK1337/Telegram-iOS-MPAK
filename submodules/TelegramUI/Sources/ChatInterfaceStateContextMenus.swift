@@ -949,7 +949,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
     
     return dataSignal
     |> deliverOnMainQueue
-    |> map { data, updatingMessageMedia, infoSummaryData, appConfig, isMessageRead, messageViewsPrivacyTips, availableReactions, translationSettings, loggingSettings, notificationSoundList, accountPeer -> ContextController.Items in
+    |> map { (data, updatingMessageMedia, infoSummaryData, appConfig, isMessageRead, messageViewsPrivacyTips, availableReactions, translationSettings, loggingSettings, notificationSoundList, accountPeer: EnginePeer?) -> ContextController.Items in
         let isPremium = accountPeer?.isPremium ?? false
         
         var actions: [ContextMenuItem] = []
@@ -2755,6 +2755,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Peer
                             optionsMap[id]!.insert(.report)
                         }
                     } else if let user = peer as? TelegramUser {
+                        let isSecretMediaRestricted = message.containsSecretMedia && !MPAKProtection.allowSelfDestructSave
                         if !isScheduled && message.id.peerId.namespace != Namespaces.Peer.SecretChat && !isSecretMediaRestricted && !isAction && !message.id.peerId.isReplies && !message.isCopyProtected() && !isShareProtected {
                             if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                 optionsMap[id]!.insert(.forward)
