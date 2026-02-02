@@ -28,7 +28,7 @@ jobs:
         with:
           xcode-version: "26.0"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           brew install bazelisk
           pip3 install -U pip --break-system-packages || true
@@ -39,24 +39,29 @@ jobs:
           path: |
             ~/bazel-disk-cache
             ~/.cache/bazel
-          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel', 'MODULE.bazel.lock', '.bazelrc', '**/*.bzl', '**/BUILD*') }}
+          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD.bazel', 'MODULE.bazel', 'MODULE.bazel.lock', '.bazelrc', '**/*.bzl', '**/BUILD*') }}
           restore-keys: |
             bazel-macos26-
 
+      # ВАЖНО: без этого шага Make.py не видит "identity" и падает на signing
+      - name: Import fake certificates (for unsigned IPA)
+        run: |
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
+          security find-identity -v -p codesigning || true
+
       - name: Build Swiftgram IPA (Unsigned)
         run: |
-          python3 build-system/Make/Make.py \
+          python3 -u build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
+            --bazelArguments="--//Telegram:disableWatchApp --//Telegram:disableExtensions" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
             --configuration=release_arm64 \
-            --codesigningInformationPath=build-system/fake-codesigning \
-            --disableProvisioningProfiles \
-            --bazelArguments="--//Telegram:disableWatchApp --//Telegram:disableExtensions"
+            --codesigningInformationPath=build-system/fake-codesigning
 
-      - name: Find built IPA
+      - name: Find Built IPA
         id: find_ipa
         run: |
           echo "Searching for IPA files..."
@@ -65,27 +70,25 @@ jobs:
           IPA_PATH=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
           if [ -n "$IPA_PATH" ]; then
             echo "Found IPA: $IPA_PATH"
-            echo "ipa_path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+            echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
           else
             echo "No IPA found"
+            exit 1
           fi
 
-      - name: Upload IPA artifact
+      - name: Upload MPAK Mod IPA
         uses: actions/upload-artifact@v4
         with:
           name: Swiftgram-MPAK-Mod-unsigned-${{ github.run_number }}
           path: |
-            build-output/**/*.ipa
-            build/**/*.ipa
-            bazel-out/**/*.ipa
             **/*.ipa
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
-      - name: Build summary
+      - name: Build Summary
         run: |
-          echo "## MPAK Mod Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## Build Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download the unsigned IPA from Artifacts and sign with ESign on iPhone." >> $GITHUB_STEP_SUMMARY
+          echo "Download the IPA from Artifacts and re-sign it on-device with ESign." >> $GITHUB_STEP_SUMMARY
