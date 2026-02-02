@@ -84,6 +84,8 @@ class BazelCommandLine:
             '--//Telegram:disableWatchApp',
             # Disable extensions by default to avoid signing requirements in unsigned builds.
             '--//Telegram:disableExtensions',
+            # Disable provisioning profiles by default to avoid signing requirements in unsigned builds.
+            '--//Telegram:disableProvisioningProfiles',
         ]
 
         self.common_debug_args = [
