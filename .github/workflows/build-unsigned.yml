@@ -7,64 +7,70 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-26
     timeout-minutes: 240
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-          
+
       - name: Setup Xcode 26
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.0'
-          
-      - name: Install Dependencies
+          xcode-version: "26.0"
+
+      - name: Install dependencies
         run: |
           brew install bazelisk
           pip3 install -U pip --break-system-packages || true
-          
+
       - name: Cache Bazel
         uses: actions/cache@v4
         with:
           path: |
             ~/bazel-disk-cache
             ~/.cache/bazel
-          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
+          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel', 'MODULE.bazel.lock', '.bazelrc', '**/*.bzl', '**/BUILD*') }}
           restore-keys: |
-            bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-
             bazel-macos26-
-            
+
       - name: Build Swiftgram IPA (Unsigned)
         run: |
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \
-            --bazelArguments="--//Telegram:disableProvisioningProfiles=True --//Telegram:disableExtensions=True" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --buildNumber=${{ github.run_number }} \
             --configuration=release_arm64 \
-            --codesigningInformationPath=build-system/fake-codesigning
-            
-      - name: Find Built IPA
+            --codesigningInformationPath=build-system/fake-codesigning \
+            --disableProvisioningProfiles \
+            --bazelArguments="--//Telegram:disableWatchApp --//Telegram:disableExtensions"
+
+      - name: Find built IPA
         id: find_ipa
         run: |
           echo "Searching for IPA files..."
-          find . -name "*.ipa" 2>/dev/null | head -10 || true
-          
+          find . -name "*.ipa" -type f 2>/dev/null | head -20 || true
+
           IPA_PATH=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
           if [ -n "$IPA_PATH" ]; then
             echo "Found IPA: $IPA_PATH"
-            echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+            echo "ipa_path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+          else
+            echo "No IPA found"
           fi
-          
-      - name: Upload MPAK Mod IPA
+
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: Swiftgram-MPAK-Mod-unsigned-${{ github.run_number }}
@@ -75,14 +81,11 @@ jobs:
             **/*.ipa
           retention-days: 30
           if-no-files-found: warn
-          
-      - name: Build Summary
+
+      - name: Build summary
         run: |
           echo "## MPAK Mod Build Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Features:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Anti-Delete (keep deleted messages)" >> $GITHUB_STEP_SUMMARY
-          echo "- Edit History (view message versions)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Download the unsigned IPA from Artifacts and sign with ESign on iPhone." >> $GITHUB_STEP_SUMMARY
