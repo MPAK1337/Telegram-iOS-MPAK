@@ -41,6 +41,16 @@ jobs:
             
       - name: Build Swiftgram IPA (Unsigned)
         run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.append("build-system/Make")
+          import GenerateProfiles
+          GenerateProfiles.generate_provisioning_profiles(
+              source_path="build-system/fake-codesigning/profiles",
+              destination_path="build-system/fake-codesigning/profiles",
+              certs_path="build-system/fake-codesigning/certs"
+          )
+          PY
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
