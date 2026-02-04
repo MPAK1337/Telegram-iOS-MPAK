@@ -459,6 +459,17 @@ def resolve_codesigning(arguments, base_path, build_configuration, provisioning_
             always_fetch=not arguments.gitCodesigningUseCurrent
         )
     elif arguments.codesigningInformationPath is not None:
+        if os.path.basename(arguments.codesigningInformationPath) == 'fake-codesigning':
+            try:
+                sys.path.append(os.path.dirname(__file__))
+                import GenerateProfiles
+                GenerateProfiles.generate_provisioning_profiles(
+                    source_path=os.path.join(arguments.codesigningInformationPath, 'profiles'),
+                    destination_path=os.path.join(arguments.codesigningInformationPath, 'profiles'),
+                    certs_path=os.path.join(arguments.codesigningInformationPath, 'certs'),
+                )
+            except Exception as exc:
+                print('Failed to regenerate fake provisioning profiles: {}'.format(exc))
         profile_source = DirectoryCodesigningSource(
             directory_path=arguments.codesigningInformationPath,
             team_id=build_configuration.team_id,
