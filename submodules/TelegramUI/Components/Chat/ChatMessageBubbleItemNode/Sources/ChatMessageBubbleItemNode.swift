@@ -3712,9 +3712,8 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
         strongSelf.appliedItem = item
 
         // MPAK: Apply deleted message styling
-        if let message = item.message as? Message {
-            let isDeleted = MPAKDeletedMessages.isMessageDeleted(message)
-            if isDeleted {
+        let isDeleted = MPAKDeletedMessages.isMessageDeleted(item.message)
+        if isDeleted {
                 // Apply reduced opacity to main content
                 strongSelf.mainContainerNode.alpha = 0.6
                 
@@ -3735,7 +3734,6 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
             } else {
                 strongSelf.mainContainerNode.alpha = 1.0
                 strongSelf.mpakDeletedIndicatorNode?.isHidden = true
-            }
         }
         strongSelf.appliedForwardInfo = (forwardSource, forwardAuthorSignature)
         strongSelf.updateAccessibilityData(accessibilityData)

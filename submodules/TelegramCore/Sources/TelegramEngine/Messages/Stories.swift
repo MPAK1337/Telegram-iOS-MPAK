@@ -1981,6 +1981,9 @@ func _internal_deleteStories(account: Account, peerId: PeerId, ids: [Int32]) -> 
 }
 
 func _internal_markStoryAsSeen(account: Account, peerId: PeerId, id: Int32, asPinned: Bool) -> Signal<Never, NoError> {
+    if MPAKGhostMode.hideStoryViews {
+        return .complete()
+    }
     if asPinned {
         return account.postbox.transaction { transaction -> Api.InputPeer? in
             return transaction.getPeer(peerId).flatMap(apiInputPeer)
@@ -2859,6 +2862,9 @@ func _internal_updateStoryViewsForMyReaction(isChannel: Bool, views: Stories.Ite
 }
 
 func _internal_setStoryReaction(account: Account, peerId: EnginePeer.Id, id: Int32, reaction: MessageReaction.Reaction?) -> Signal<Never, NoError> {
+    if MPAKGhostMode.hideEmojiReactions {
+        return .complete()
+    }
     return account.postbox.transaction { transaction -> (Stories.StoredItem?, Api.InputPeer?) in
         guard let peer = transaction.getPeer(peerId) else {
             return (nil, nil)

@@ -23,17 +23,24 @@ def import_certificates(certificatesPath):
         keychain_name
     ], check_result=True)
 
-    existing_keychains = run_executable_with_output('security', arguments=['list-keychains', '-d', 'user'])
-    existing_keychains.replace('"', '')
-
     run_executable_with_output('security', arguments=[
-        'list-keychains',
-        '-d',
-        'user',
+        'default-keychain',
         '-s',
-        keychain_name,
-        existing_keychains
+        keychain_name
     ], check_result=True)
+
+    existing_keychains_output = run_executable_with_output('security', arguments=['list-keychains', '-d', 'user'])
+    existing_keychains = [
+        line.strip().strip('"')
+        for line in existing_keychains_output.splitlines()
+        if line.strip()
+    ]
+
+    run_executable_with_output(
+        'security',
+        arguments=['list-keychains', '-d', 'user', '-s', keychain_name, *existing_keychains],
+        check_result=True
+    )
 
     run_executable_with_output('security', arguments=['set-keychain-settings', keychain_name])
     run_executable_with_output('security', arguments=['unlock-keychain', '-p', keychain_password, keychain_name])

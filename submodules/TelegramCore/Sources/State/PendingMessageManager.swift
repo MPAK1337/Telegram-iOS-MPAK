@@ -1426,6 +1426,9 @@ public final class PendingMessageManager {
                             transaction.setPeerChatState(message.id.peerId, state: updatedState)
                         }
                     } else if case .historyScreenshot = media.action {
+                        if MPAKProtection.disableScreenshotNotifications {
+                            break
+                        }
                         sentAsAction = true
                         let updatedState = addSecretChatOutgoingOperation(transaction: transaction, peerId: message.id.peerId, operation: .screenshotMessages(layer: layer, actionGloballyUniqueId: message.globallyUniqueId!, globallyUniqueIds: [], messageId: message.id), state: state)
                         if updatedState != state {

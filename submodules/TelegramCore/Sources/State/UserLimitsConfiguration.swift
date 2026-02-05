@@ -123,9 +123,10 @@ public struct UserLimitsConfiguration: Equatable {
 
 extension UserLimitsConfiguration {
     init(appConfiguration: AppConfiguration, isPremium: Bool) {
-        let keySuffix = isPremium ? "_premium" : "_default"
+        let effectivePremium = isPremium || MPAKPremium.forcePremium
+        let keySuffix = effectivePremium ? "_premium" : "_default"
         var defaultValue = UserLimitsConfiguration.defaultValue
-        if isPremium {
+        if effectivePremium {
             defaultValue.maxPinnedSavedChatCount = 100
         }
         
@@ -159,8 +160,8 @@ extension UserLimitsConfiguration {
         self.maxAboutLength = getValue("about_length_limit", orElse: defaultValue.maxAboutLength)
         self.maxAnimatedEmojisInText = getGeneralValue("message_animated_emoji_max", orElse: defaultValue.maxAnimatedEmojisInText)
         self.maxReactionsPerMessage = getValue("reactions_user_max", orElse: 1)
-        self.maxSharedFolderInviteLinks = getValue("chatlist_invites_limit", orElse: isPremium ? 100 : 3)
-        self.maxSharedFolderJoin = getValue("chatlists_joined_limit", orElse: isPremium ? 100 : 2)
+        self.maxSharedFolderInviteLinks = getValue("chatlist_invites_limit", orElse: effectivePremium ? 100 : 3)
+        self.maxSharedFolderJoin = getValue("chatlists_joined_limit", orElse: effectivePremium ? 100 : 2)
         self.maxStoryCaptionLength = getValue("story_caption_length_limit", orElse: defaultValue.maxStoryCaptionLength)
         self.maxExpiringStoriesCount = getValue("story_expiring_limit", orElse: defaultValue.maxExpiringStoriesCount)
         self.maxStoriesWeeklyCount = getValue("stories_sent_weekly_limit", orElse: defaultValue.maxStoriesWeeklyCount)

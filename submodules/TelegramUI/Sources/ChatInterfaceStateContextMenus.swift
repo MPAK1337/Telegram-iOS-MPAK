@@ -729,7 +729,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                     }
                 }
             } else if let image = media as? TelegramMediaImage {
-                if !messages[0].containsSecretMedia {
+                if !messages[0].containsSecretMedia || MPAKProtection.allowSelfDestructSave {
                     loadCopyMediaResource = largestImageRepresentation(image.representations)?.resource
                 }
             } else if let dice = media as? TelegramMediaDice {
@@ -949,7 +949,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
     
     return dataSignal
     |> deliverOnMainQueue
-    |> map { data, updatingMessageMedia, infoSummaryData, appConfig, isMessageRead, messageViewsPrivacyTips, availableReactions, translationSettings, loggingSettings, notificationSoundList, accountPeer -> ContextController.Items in
+    |> map { (data, updatingMessageMedia, infoSummaryData, appConfig, isMessageRead, messageViewsPrivacyTips, availableReactions, translationSettings, loggingSettings, notificationSoundList, accountPeer: EnginePeer?) -> ContextController.Items in
         let isPremium = accountPeer?.isPremium ?? false
         
         var actions: [ContextMenuItem] = []
@@ -1193,31 +1193,34 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         
         // MPAK Mod: History button for edited messages
         if MPAKSettings.antiEditEnabled {
-            let editHistory = MPAKDeletedMessages.getEditHistory(message: messages[0])
+            let editHistory = messages[0].mpakAttribute?.editHistory ?? []
             if !editHistory.isEmpty {
-                actions.append(.action(ContextMenuActionItem(text: MPAKSettings.Strings.historyButtonTitle, icon: { theme in
+                let historyButtonTitle = i18n("MPAK.History.ContextMenu", chatPresentationInterfaceState.strings.baseLanguageCode)
+                actions.append(.action(ContextMenuActionItem(text: historyButtonTitle, icon: { theme in
                     return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.actionSheet.primaryTextColor)
                 }, action: { c, _ in
                     c?.dismiss(result: .dismissWithoutContent, completion: {
                         // Show edit history
                         var historyText = ""
                         for (index, entry) in editHistory.enumerated() {
-                            let date = Date(timeIntervalSince1970: Double(entry.date))
+                            let date = Date(timeIntervalSince1970: Double(entry.timestamp))
                             let formatter = DateFormatter()
                             formatter.dateStyle = .short
                             formatter.timeStyle = .short
-                            historyText += "\(index + 1). [\(formatter.string(from: date))]\n\(entry.text)\n"
-                            if let media = entry.mediaDescription {
-                                historyText += "\(media)\n"
+                            historyText += "\(index + 1). [\(formatter.string(from: date))]\n"
+                            if entry.originalText == entry.finalText {
+                                historyText += "\(entry.finalText)\n"
+                            } else {
+                                historyText += "→ \(entry.originalText)\n→ \(entry.finalText)\n"
                             }
                             historyText += "\n"
                         }
                         
                         let alertController = textAlertController(
                             context: context,
-                            title: MPAKSettings.Strings.historyButtonTitle,
-                            text: historyText.isEmpty ? "No history" : historyText,
-                            actions: [TextAlertAction(type: .defaultAction, title: "OK", action: {})]
+                            title: i18n("MPAK.History.Title", chatPresentationInterfaceState.strings.baseLanguageCode),
+                            text: historyText.isEmpty ? i18n("MPAK.History.Empty", chatPresentationInterfaceState.strings.baseLanguageCode) : historyText,
+                            actions: [TextAlertAction(type: .defaultAction, title: chatPresentationInterfaceState.strings.Common_OK, action: {})]
                         )
                         controllerInteraction.presentController(alertController, nil)
                     })
@@ -1311,7 +1314,8 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             }
         }
         
-        let isCopyProtected = chatPresentationInterfaceState.copyProtectionEnabled || message.isCopyProtected()
+        let isCopyProtected = (chatPresentationInterfaceState.copyProtectionEnabled || message.isCopyProtected()) && !MPAKProtection.allowProtectedContentSave
+        let isSecretMediaRestricted = message.containsSecretMedia && !MPAKProtection.allowSelfDestructSave
         if !messageText.isEmpty || (resourceAvailable && isImage) || diceEmoji != nil {
             if !isExpired {
                 if !isPoll {
@@ -1433,7 +1437,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             }
         }
         
-        if resourceAvailable, !message.containsSecretMedia && !isCopyProtected {
+        if resourceAvailable, !isSecretMediaRestricted && !isCopyProtected {
             var mediaReference: AnyMediaReference?
             var isVideo = false
             for media in message.media {
@@ -2611,7 +2615,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Peer
                     }
                 }
                 
-                if message.isCopyProtected() || message.containsSecretMedia {
+                if (message.isCopyProtected() && !MPAKProtection.allowProtectedContentSave) || (message.containsSecretMedia && !MPAKProtection.allowSelfDestructSave) {
                     isCopyProtected = true
                 }
                 for media in message.media {
@@ -2716,7 +2720,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Peer
                                 banPeer = nil
                             }
                         }
-                        if !message.containsSecretMedia && !isAction && !isShareProtected {
+                        if (!message.containsSecretMedia || MPAKProtection.allowSelfDestructSave) && !isAction && !isShareProtected {
                             if message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.isCopyProtected() {
                                 if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                     optionsMap[id]!.insert(.forward)
@@ -2732,7 +2736,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Peer
                             }
                         }
                     } else if let group = peer as? TelegramGroup {
-                        if message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.containsSecretMedia {
+                        if message.id.peerId.namespace != Namespaces.Peer.SecretChat && (!message.containsSecretMedia || MPAKProtection.allowSelfDestructSave) {
                             if !isAction && !message.isCopyProtected() && !isShareProtected {
                                 if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                     optionsMap[id]!.insert(.forward)
@@ -2752,7 +2756,8 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Peer
                             optionsMap[id]!.insert(.report)
                         }
                     } else if let user = peer as? TelegramUser {
-                        if !isScheduled && message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.containsSecretMedia && !isAction && !message.id.peerId.isReplies && !message.isCopyProtected() && !isShareProtected {
+                        let isSecretMediaRestricted = message.containsSecretMedia && !MPAKProtection.allowSelfDestructSave
+                        if !isScheduled && message.id.peerId.namespace != Namespaces.Peer.SecretChat && !isSecretMediaRestricted && !isAction && !message.id.peerId.isReplies && !message.isCopyProtected() && !isShareProtected {
                             if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                 optionsMap[id]!.insert(.forward)
                             }

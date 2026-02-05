@@ -35,9 +35,8 @@ jobs:
           path: |
             ~/bazel-disk-cache
             ~/.cache/bazel
-          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-${{ github.sha }}
+          key: bazel-macos26-${{ hashFiles('WORKSPACE', 'MODULE.bazel', 'MODULE.bazel.lock', '**/BUILD', '**/*.bazel', 'build-system/**') }}
           restore-keys: |
-            bazel-macos26-${{ hashFiles('WORKSPACE', 'BUILD') }}-
             bazel-macos26-
 
       # ✅ ВАЖНО: импорт фейковых сертификатов, иначе process-and-sign упадёт
@@ -49,6 +48,17 @@ jobs:
 
       - name: Build Swiftgram IPA (for re-sign in ESign)
         run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.append("build-system/Make")
+          import GenerateProfiles
+          GenerateProfiles.generate_provisioning_profiles(
+              source_path="build-system/fake-codesigning/profiles",
+              destination_path="build-system/fake-codesigning/profiles",
+              certs_path="build-system/fake-codesigning/certs"
+          )
+          PY
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/bazel-disk-cache" \
             --overrideBazelVersion \

@@ -27,9 +27,13 @@ public class MPAKMessageAttribute: MessageAttribute {
         let historyCount = decoder.decodeInt32ForKey("mpak_editHistoryCount", orElse: 0)
         var history: [MPAKEditRecord] = []
         for i in 0..<historyCount {
-            let text = decoder.decodeStringForKey("mpak_editText_\(i)", orElse: "")
+            let originalText = decoder.decodeStringForKey("mpak_editOriginalText_\(i)", orElse: "")
+            let finalText = decoder.decodeStringForKey("mpak_editFinalText_\(i)", orElse: "")
+            let fallbackText = decoder.decodeStringForKey("mpak_editText_\(i)", orElse: "")
             let timestamp = decoder.decodeInt32ForKey("mpak_editTime_\(i)", orElse: 0)
-            history.append(MPAKEditRecord(text: text, timestamp: timestamp))
+            let resolvedOriginal = originalText.isEmpty ? fallbackText : originalText
+            let resolvedFinal = finalText.isEmpty ? fallbackText : finalText
+            history.append(MPAKEditRecord(originalText: resolvedOriginal, finalText: resolvedFinal, timestamp: timestamp))
         }
         self.editHistory = history
     }
@@ -42,7 +46,8 @@ public class MPAKMessageAttribute: MessageAttribute {
         
         encoder.encodeInt32(Int32(editHistory.count), forKey: "mpak_editHistoryCount")
         for (i, record) in editHistory.enumerated() {
-            encoder.encodeString(record.text, forKey: "mpak_editText_\(i)")
+            encoder.encodeString(record.originalText, forKey: "mpak_editOriginalText_\(i)")
+            encoder.encodeString(record.finalText, forKey: "mpak_editFinalText_\(i)")
             encoder.encodeInt32(record.timestamp, forKey: "mpak_editTime_\(i)")
         }
     }
@@ -50,11 +55,13 @@ public class MPAKMessageAttribute: MessageAttribute {
 
 // MARK: - Edit Record
 public struct MPAKEditRecord: Equatable {
-    public let text: String
+    public let originalText: String
+    public let finalText: String
     public let timestamp: Int32
     
-    public init(text: String, timestamp: Int32) {
-        self.text = text
+    public init(originalText: String, finalText: String, timestamp: Int32) {
+        self.originalText = originalText
+        self.finalText = finalText
         self.timestamp = timestamp
     }
     
@@ -127,7 +134,8 @@ public extension Transaction {
     func addEditHistoryRecord(messageId: MessageId, originalText: String) {
         updateMPAKAttribute(messageId: messageId) { attr in
             let record = MPAKEditRecord(
-                text: originalText,
+                originalText: originalText,
+                finalText: originalText,
                 timestamp: Int32(Date().timeIntervalSince1970)
             )
             attr.editHistory.append(record)

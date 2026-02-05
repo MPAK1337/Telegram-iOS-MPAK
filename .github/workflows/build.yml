@@ -28,6 +28,15 @@ jobs:
           cp -R $GITHUB_WORKSPACE /Users/Shared/
           mv /Users/Shared/$(basename $GITHUB_WORKSPACE) /Users/Shared/telegram-ios
 
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: |
+            /private/var/tmp/_bazel_containerhost
+          key: bazel-macos13-${{ hashFiles('WORKSPACE', 'MODULE.bazel', 'MODULE.bazel.lock', '**/BUILD', '**/*.bazel', 'build-system/**') }}
+          restore-keys: |
+            bazel-macos13-
+
       - name: Build the App
         run: |
           set -x
@@ -49,12 +58,25 @@ jobs:
           echo "BUILD_NUMBER=$(echo $BUILD_NUMBER)" >> $GITHUB_ENV
           echo "APP_VERSION=$(echo $APP_VERSION)" >> $GITHUB_ENV
 
+          python3 - <<'PY'
+          import sys
+          sys.path.append("build-system/Make")
+          import GenerateProfiles
+          GenerateProfiles.generate_provisioning_profiles(
+              source_path="build-system/fake-codesigning/profiles",
+              destination_path="build-system/fake-codesigning/profiles",
+              certs_path="build-system/fake-codesigning/certs"
+          )
+          PY
+
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --codesigningInformationPath=build-system/fake-codesigning \
+            --disableExtensions \
+            --disableProvisioningProfiles \
             --configuration=release_arm64 \
             --buildNumber="$BUILD_NUMBER"
 

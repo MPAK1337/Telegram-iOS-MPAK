@@ -70,6 +70,12 @@ bool_flag(
 )
 
 bool_flag(
+    name = "disableWatchApp",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
     name = "disableProvisioningProfiles",
     build_setting_default = False,
     visibility = ["//visibility:public"],
@@ -85,6 +91,13 @@ config_setting(
     name = "disableExtensionsSetting",
     flag_values = {
         ":disableExtensions": "True",
+    },
+)
+
+config_setting(
+    name = "disableWatchAppSetting",
+    flag_values = {
+        ":disableWatchApp": "True",
     },
 )
 
@@ -2027,7 +2040,7 @@ ios_application(
     families = ["iphone", "ipad"],
     minimum_os_version = minimum_os_version,
     provisioning_profile = select({
-        ":disableProvisioningProfilesSetting": None,
+        ":disableProvisioningProfilesSetting": ":Telegram_xcode_profile" if telegram_use_xcode_managed_codesigning else "@build_configuration//provisioning:Telegram.mobileprovision",
         "//conditions:default": ":Telegram_xcode_profile" if telegram_use_xcode_managed_codesigning else "@build_configuration//provisioning:Telegram.mobileprovision",
     }),
     entitlements = ":TelegramEntitlements.entitlements",
@@ -2072,6 +2085,7 @@ ios_application(
     }),
     watch_application = select({
         ":disableExtensionsSetting": None,
+        ":disableWatchAppSetting": None,
         "//conditions:default": ":TelegramWatchApp",
     }), # MARK: Swiftgram
     deps = [
